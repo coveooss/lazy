@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{64a31cc6-fa43-4d9c-8f31-659287634f71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\coveo">
+      <UniqueIdentifier>{79854094-878b-4633-b721-773605b4acea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\coveo\lazy">
+      <UniqueIdentifier>{ed6f40c6-fa63-4104-a2a6-45819a4d5c22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\coveo\lazy\detail">
+      <UniqueIdentifier>{351bc2c5-190f-43b1-a66c-d834df298ef4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{addc7b68-eafb-48fb-b4d6-d1419744dff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\coveo">
+      <UniqueIdentifier>{1d2a19a9-5d59-43e0-bbdb-8cdd9159ca27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\coveo\lazy">
+      <UniqueIdentifier>{589907f2-0696-449a-a045-a63c84decdf8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\lib\coveo\lazy\detail\lazy_sorted_container.h">
+      <Filter>lib\coveo\lazy\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\coveo\lazy\map.h">
+      <Filter>lib\coveo\lazy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\coveo\lazy\exception.h">
+      <Filter>lib\coveo\lazy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\coveo\lazy\set.h">
+      <Filter>lib\coveo\lazy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\coveo\lazy\iterator.h">
+      <Filter>lib\coveo\lazy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\coveo\lazy\all_tests.h">
+      <Filter>tests\coveo\lazy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\coveo\lazy\map_tests.h">
+      <Filter>tests\coveo\lazy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\coveo\lazy\set_tests.h">
+      <Filter>tests\coveo\lazy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\coveo\test_framework.h">
+      <Filter>tests\coveo</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\tests\coveo\lazy\all_tests.cpp">
+      <Filter>tests\coveo\lazy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\coveo\lazy\map_tests.cpp">
+      <Filter>tests\coveo\lazy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\coveo\lazy\set_tests.cpp">
+      <Filter>tests\coveo\lazy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\tests_main.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
