@@ -1,5 +1,4 @@
-[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/coveo/lazy/master/LICENSE)
-# `coveo::lazy`
+# `coveo::lazy` [![Build Status](https://travis-ci.org/coveo/lazy.svg?branch=master)](https://travis-ci.org/coveo/lazy) [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/coveo/lazy/master/LICENSE)
 A C++ library of associative containers, like `std::set`, that perform lazy sorting.
 
 ## TL;DR
