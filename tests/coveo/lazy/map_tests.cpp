@@ -25,11 +25,11 @@ using testcontainer = std::vector<T>;
 // Helpers to compare containers without using native operators.
 template<typename C1, typename C2>
 bool containers_are_equal(const C1& c1, const C2& c2) {
-    return std::equal(std::cbegin(c1), std::cend(c1), std::cbegin(c2), std::cend(c2));
+    return std::equal(std::begin(c1), std::end(c1), std::begin(c2), std::end(c2));
 }
 template<typename C1, typename C2>
 bool container_is_less_than(const C1& c1, const C2& c2) {
-    return std::lexicographical_compare(std::cbegin(c1), std::cend(c1), std::cbegin(c2), std::cend(c2));
+    return std::lexicographical_compare(std::begin(c1), std::end(c1), std::begin(c2), std::end(c2));
 }
 
 // Simple class that can be compared with ints.
