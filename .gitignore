@@ -38,3 +38,9 @@
 *.sdf
 *.opensdf
 *.suo
+
+# Visual Studio output directory
+bin/
+
+# Visual Studio intermediate directory
+obj/

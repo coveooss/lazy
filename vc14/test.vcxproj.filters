@@ -24,45 +24,45 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\lib\coveo\lazy\detail\lazy_sorted_container.h">
+    <ClInclude Include="..\lib\coveo\lazy\detail\lazy_sorted_container.h">
       <Filter>lib\coveo\lazy\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\coveo\lazy\map.h">
+    <ClInclude Include="..\lib\coveo\lazy\map.h">
       <Filter>lib\coveo\lazy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\coveo\lazy\exception.h">
+    <ClInclude Include="..\lib\coveo\lazy\exception.h">
       <Filter>lib\coveo\lazy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\coveo\lazy\set.h">
+    <ClInclude Include="..\lib\coveo\lazy\set.h">
       <Filter>lib\coveo\lazy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\lib\coveo\lazy\iterator.h">
+    <ClInclude Include="..\lib\coveo\lazy\iterator.h">
       <Filter>lib\coveo\lazy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tests\coveo\lazy\all_tests.h">
+    <ClInclude Include="..\tests\coveo\lazy\all_tests.h">
       <Filter>tests\coveo\lazy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tests\coveo\lazy\map_tests.h">
+    <ClInclude Include="..\tests\coveo\lazy\map_tests.h">
       <Filter>tests\coveo\lazy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tests\coveo\lazy\set_tests.h">
+    <ClInclude Include="..\tests\coveo\lazy\set_tests.h">
       <Filter>tests\coveo\lazy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tests\coveo\test_framework.h">
+    <ClInclude Include="..\tests\coveo\test_framework.h">
       <Filter>tests\coveo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\tests\coveo\lazy\all_tests.cpp">
+    <ClCompile Include="..\tests\coveo\lazy\all_tests.cpp">
       <Filter>tests\coveo\lazy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\coveo\lazy\map_tests.cpp">
+    <ClCompile Include="..\tests\coveo\lazy\map_tests.cpp">
       <Filter>tests\coveo\lazy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\coveo\lazy\set_tests.cpp">
+    <ClCompile Include="..\tests\coveo\lazy\set_tests.cpp">
       <Filter>tests\coveo\lazy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\tests_main.cpp">
+    <ClCompile Include="..\tests\tests_main.cpp">
       <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>

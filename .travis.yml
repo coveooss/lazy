@@ -20,6 +20,5 @@ matrix:
     env: COMPILER=clang++-3.8
 script:
 - $COMPILER --version
-- cd build/gcc531
 - make CXX=$COMPILER
-- ./all_tests
+- ./all_tests.out
