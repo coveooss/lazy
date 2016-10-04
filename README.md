@@ -29,7 +29,7 @@ int main()
 ```
 
 ## Installing
-The library is header-only. Therefore, to add it to your project, simply copy the content of the [`lib`](https://github.com/coveo/lazy/tree/master/lib) directory to a suitable place in your structure and add that path to your include paths. Look at the [`test`](https://github.com/coveo/lazy/tree/master/build) projects/makefiles for examples.
+The library is header-only. Therefore, to add it to your project, simply copy the content of the [`lib`](https://github.com/coveo/lazy/tree/master/lib) directory to a suitable place in your structure and add that path to your include paths. Look at the `test` project/makefile for examples.
 
 ## Compiler support
 `coveo::lazy` requires a C++ compiler that is fairly up-to-date with the C++11/14 standard. It has been successfully tested with the following compilers; YMMV.
