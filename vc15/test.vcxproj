@@ -193,6 +193,13 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Benchmarks|Win32'">
     <ClCompile>
@@ -208,6 +215,13 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -223,6 +237,13 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Benchmarks|x64'">
     <ClCompile>
@@ -238,6 +259,13 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -257,6 +285,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Benchmarks|Win32'">
     <ClCompile>
@@ -276,6 +311,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -295,6 +337,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Benchmarks|x64'">
     <ClCompile>
@@ -314,6 +363,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)out" 
+copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying output to "out" dir for AppVeyor...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\coveo\lazy\detail\lazy_sorted_container.h" />

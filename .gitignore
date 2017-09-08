@@ -41,6 +41,7 @@
 
 # Visual Studio output directory
 bin/
+out/
 
 # Visual Studio intermediate directory
 obj/
