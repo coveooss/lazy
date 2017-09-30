@@ -45,3 +45,7 @@ out/
 
 # Visual Studio intermediate directory
 obj/
+
+# Documentation output
+doc/html/
+doc/latex/
