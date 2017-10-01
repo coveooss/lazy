@@ -1,8 +1,34 @@
-// Copyright (c) 2015-2016, Coveo Solutions Inc.
-// Distributed under the Apache License, Version 2.0 (see LICENSE).
+/**
+ * @file
+ * @brief Lazy-sorted container internals.
+ *
+ * This header file contains implementation details of lazy-sorted
+ * associative containers. It should not be necessary to use types
+ * defined in this header directly; instead, use types declared in
+ * <tt>coveo/lazy/map.h</tt> or <tt>coveo/lazy/set.h</tt>.
+ *
+ * @author Charles Lechasseur <shiftingbeard@gmx.com>
+ * @copyright 2015-2016, Coveo Solutions Inc.
+ *            Distributed under the Apache License, Version 2.0 (see LICENSE).
+ */
 
-// This file contains the internal implementation common to all lazy-sorted
-// containers as well as other internal types/functions as needed.
+/**
+ * @mainpage <tt>coveo::lazy</tt>
+ *
+ * Welcome to the documentation of the <tt>coveo::lazy</tt> library.
+ * This library implements four associative containers that are similar
+ * (in terms of interface) to the associative containers provided by the
+ * standard C++ library. The main difference is their implementation:
+ * instead of storing elements in a tree-like structure, they store
+ * their elements in a regular container (by default <tt>std::vector</tt>)
+ * and perform sorting only when needed (when @c find is called, for
+ * instance). This results in dramatically-reduced storage space, at
+ * the cost of an expensive sorting operation once in a while.
+ *
+ * These containers are designed to be used in situations where insertions
+ * in the container are usually performed in batches, followed by queries.
+ * They are simpler to use than manually sorting <tt>std::vector</tt>s.
+ */
 
 #ifndef COVEO_LAZY_DETAIL_LAZY_SORTED_CONTAINER_H
 #define COVEO_LAZY_DETAIL_LAZY_SORTED_CONTAINER_H
@@ -529,54 +555,61 @@ template<> struct updated_lazy_container_sorted_flag_after_insert<false> {
 template<typename T> struct mapped_type_base { typedef T mapped_type; };
 template<> struct mapped_type_base<void> { };
 
-// Implementation of a container that maintains a sorted set of elements, like
-// std::set or std::map. The container uses another container internally to
-// store elements in order to optimize size and speed; the container is sorted
-// only when needed (or it can be triggered on-demand).
-//
-// This class meets the requirements of Container, ReversibleContainer,
-// AllocatorAwareContainer and AssociativeContainer. Furthermore, the internal
-// container type must meet the requirements of Container, ReversibleContainer,
-// AllocatorAwareContainer and SequenceContainer. For details on those concepts,
-// see http://en.cppreference.com/w/cpp/concept
-//
-// This class is not thread-safe; furthermore, because it performs on-demand
-// sorting, there are only two ways of using it in a multi-threaded context:
-// - Protect it with an exclusive mutex like std::mutex, or
-// - Protect it with a shared mutex like std::shared_mutex and make sure that
-//   it is always sorted before writer threads release their write locks.
-//
-// If this container is a map (e.g., type T is not void), this class will
-// additionally have a mapped_type typedef (defined as T). Furthermore, if
-// the map does not accept duplicates (e.g., Multi is false), the following
-// additional methods are included:
-// - at
-// - operator[]
-// - insert_or_assign
-// - try_emplace
-// Note, however, that those methods all require the container to be sorted to
-// work, so they could be less efficient that blind inserts.
-//
-// Template arguments:
-// K     - Type of keys used to sort elements in the container.
-// T     - Type of values bound to each key. If this is set to void, the
-//         container is assumed to be a set (like std::set) and its iterators
-//         will always return const references. Otherwise, this is assumed to be
-//         a map (like std::map) and will contain extra elements (see above).
-// V     - Type of elements stored in the container.
-// PubV  - Type of elements that container should appear to contain. Iterators
-//         will return references to this type. Must either be the same as V
-//         or a derived type (e.g., std::is_base_of<PubV, V>::value is true).
-// VToK  - Predicate that, given a const V&, will return the key to use
-//         to sort the element. For best performance, this should be a
-//         const K& pointing to a key inside the element.
-// KCmp  - Predicate used to compare keys.
-// KEq   - Predicate used to test keys for equality.
-// Alloc - Type of allocator to use for the underlying storage.
-// Impl  - Type of container to use for internal storage. Must have the same
-//         template parameters as std::vector/deque/etc.
-// Multi - Whether container is allowed to have duplicates. Set this to true
-//         for std::multiset/multimap-like containers.
+/**
+ * @brief Template base class for lazy-sorted associative containers.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Implementation of a container that maintains a sorted set of elements, like
+ * <tt>std::set</tt> or <tt>std::map</tt>. The container uses another container
+ * internally to store elements in order to optimize size and speed; the container
+ * is sorted only when needed (or it can be triggered on-demand).
+ *
+ * This class meets the requirements of @c Container, @c ReversibleContainer,
+ * @c AllocatorAwareContainer and @c AssociativeContainer. Furthermore, the internal
+ * container type must meet the requirements of @c Container, @c ReversibleContainer,
+ * @c AllocatorAwareContainer and @c SequenceContainer. For details on those concepts,
+ * see http://en.cppreference.com/w/cpp/concept
+ *
+ * This class is not thread-safe; furthermore, because it performs on-demand
+ * sorting, there are only two ways of using it in a multi-threaded context:
+ * @li Protect it with an exclusive mutex like <tt>std::mutex</tt>, or
+ * @li Protect it with a shared mutex like <tt>std::shared_mutex</tt> and make sure
+ *     that it is always sorted before writer threads release their write locks.
+ *
+ * If this container is a map (e.g., type @c T is not @c void), this class will
+ * additionally have a @c mapped_type typedef (defined as @c T). Furthermore, if
+ * the map does not accept duplicates (e.g., @c Multi is @c false), the following
+ * additional methods are included:
+ *
+ * @li <tt>at</tt>
+ * @li <tt>operator[]</tt>
+ * @li <tt>insert_or_assign</tt>
+ * @li <tt>try_emplace</tt>
+ *
+ * Note, however, that those methods all require the container to be sorted to
+ * work, so they could be less efficient that blind inserts.
+ *
+ * @tparam K Type of keys used to sort elements in the container.
+ * @tparam T Type of values bound to each key. If this is set to @c void, the
+ *           container is assumed to be a set (like <tt>std::set</tt>) and its iterators
+ *           will always return const references. Otherwise, this is assumed to be
+ *           a map (like <tt>std::map</tt>) and will contain extra elements (see above).
+ * @tparam V Type of elements stored in the container.
+ * @tparam PubV Type of elements that container should appear to contain. Iterators
+ *              will return references to this type. Must either be the same as @c V
+ *              or a derived type (e.g., <tt>std::is_base_of<PubV, V>::value</tt> is
+ *              @c true).
+ * @tparam VToK Predicate that, given a <tt>const V&</tt>, will return the key to use
+ *              to sort the element. For best performance, this should be a
+ *              <tt>const K&</tt> pointing to a key inside the element.
+ * @tparam KCmp Predicate used to compare keys.
+ * @tparam KEq Predicate used to test keys for equality.
+ * @tparam Alloc Type of allocator to use for the underlying storage.
+ * @tparam Impl Type of container to use for internal storage. Must have the same
+ *              template parameters as <tt>std::vector/deque/etc.</tt>
+ * @tparam Multi Whether container is allowed to have duplicates. Set this to
+ *               @c true for <tt>std::multiset/multimap</tt>-like containers.
+ */
 template<typename K,
          typename T,
          typename V,

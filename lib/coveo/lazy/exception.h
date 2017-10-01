@@ -1,7 +1,11 @@
-// Copyright (c) 2015-2016, Coveo Solutions Inc.
-// Distributed under the Apache License, Version 2.0 (see LICENSE).
-
-// Definition of exceptions used in the lazy sorted container library.
+/**
+ * @file
+ * @brief Exception classes used by lazy-sorted associative containers.
+ *
+ * @author Charles Lechasseur <shiftingbeard@gmx.com>
+ * @copyright 2015-2016, Coveo Solutions Inc.
+ *            Distributed under the Apache License, Version 2.0 (see LICENSE).
+ */
 
 #ifndef COVEO_LAZY_EXCEPTION_H
 #define COVEO_LAZY_EXCEPTION_H
@@ -11,9 +15,14 @@
 namespace coveo {
 namespace lazy {
 
-// Subclass of std::out_of_range used by lazy sorted containers.
-// Thrown by methods like coveo::lazy::map::at().
-// For mor information, see http://en.cppreference.com/w/cpp/error/out_of_range
+/**
+ * @brief Out-of-range exception.
+ * @headerfile exception.h <coveo/lazy/exception.h>
+ *
+ * Subclass of <tt>std::out_of_range</tt> used by lazy sorted containers.
+ * Thrown by methods like <tt>coveo::lazy::map::at()</tt>.
+ * For mor information, see http://en.cppreference.com/w/cpp/error/out_of_range
+ */
 class out_of_range : public std::out_of_range
 {
 public:
