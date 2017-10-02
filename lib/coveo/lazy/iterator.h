@@ -1,7 +1,10 @@
-// Copyright (c) 2015-2016, Coveo Solutions Inc.
-// Distributed under the Apache License, Version 2.0 (see LICENSE).
-
-// Helper iterators to be used with lazy sorted containers.
+/**
+ * @file
+ * @brief Iterator helpers for lazy-sorted containers.
+ *
+ * @copyright 2015-2016, Coveo Solutions Inc.
+ *            Distributed under the Apache License, Version 2.0 (see <a href="https://github.com/coveo/lazy/blob/master/LICENSE">LICENSE</a>).
+ */
 
 #ifndef COVEO_LAZY_ITERATOR_H
 #define COVEO_LAZY_ITERATOR_H
@@ -13,9 +16,16 @@
 namespace coveo {
 namespace lazy {
 
-// Equivalent of std::insert_iterator usable with lazy sorted containers.
-// Always performs blind insertions.
-// Mirrors http://en.cppreference.com/w/cpp/iterator/insert_iterator
+/**
+ * @brief Insertion iterator for lazy-sorted containers.
+ * @headerfile iterator.h <coveo/lazy/iterator.h>
+ *
+ * Equivalent of <tt>std::insert_iterator</tt> usable with lazy
+ * sorted containers. Always performs blind insertions.
+ * Mirrors http://en.cppreference.com/w/cpp/iterator/insert_iterator
+ *
+ * @see coveo::lazy::inserter()
+ */
 template<typename Container>
 class insert_iterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
 {
@@ -42,11 +52,20 @@ public:
     insert_iterator& operator++() { return *this; }
     insert_iterator& operator++(int) { return *this; }
 
+    /// @cond NEVERSHOWN
+
 protected:
     container_type* pc_;    // Pointer to container where to insert
+
+    /// @endcond
 };
 
-// Helper functions to create coveo::lazy::insert_iterator instances
+/**
+ * @brief Helper function to create <tt>coveo::lazy::insert_iterator</tt> instances.
+ * @headerfile iterator.h <coveo/lazy/iterator.h>
+ *
+ * @see coveo::lazy::insert_iterator
+ */
 template<typename Container> auto inserter(Container& c) {
     return insert_iterator<Container>(c);
 }

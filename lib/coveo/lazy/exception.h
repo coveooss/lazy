@@ -2,9 +2,8 @@
  * @file
  * @brief Exception classes used by lazy-sorted associative containers.
  *
- * @author Charles Lechasseur <shiftingbeard@gmx.com>
  * @copyright 2015-2016, Coveo Solutions Inc.
- *            Distributed under the Apache License, Version 2.0 (see LICENSE).
+ *            Distributed under the Apache License, Version 2.0 (see <a href="https://github.com/coveo/lazy/blob/master/LICENSE">LICENSE</a>).
  */
 
 #ifndef COVEO_LAZY_EXCEPTION_H

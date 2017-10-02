@@ -7,9 +7,8 @@
  * defined in this header directly; instead, use types declared in
  * <tt>coveo/lazy/map.h</tt> or <tt>coveo/lazy/set.h</tt>.
  *
- * @author Charles Lechasseur <shiftingbeard@gmx.com>
  * @copyright 2015-2016, Coveo Solutions Inc.
- *            Distributed under the Apache License, Version 2.0 (see LICENSE).
+ *            Distributed under the Apache License, Version 2.0 (see <a href="https://github.com/coveo/lazy/blob/master/LICENSE">LICENSE</a>).
  */
 
 /**
@@ -50,12 +49,23 @@ namespace coveo {
 namespace lazy {
 namespace detail {
 
-// Incomplete type to make some template usage fail.
+/**
+ * @internal
+ * @brief Incomplete type to make some template usage fail.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ */
 struct incomplete_type;
 
-// Type trait that can be used to know if there is a usable operator==()
-// for a given type. Detects both member and non-member functions.
-// Inspired by http://stackoverflow.com/a/257382 and others.
+/**
+ * @internal
+ * @brief Trait to detect <tt>operator==</tt>.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Type trait that can be used to know if there is a usable
+ * <tt>operator==</tt> for a given type. Detects both member
+ * and non-member functions. Inspired by
+ * http://stackoverflow.com/a/257382 and others.
+ */
 template<typename T>
 class has_operator_equal
 {
@@ -68,8 +78,15 @@ public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
 
-// Type trait that can be used to know if a type has a reserve() method
-// that is callable with a single argument of the given type.
+/**
+ * @internal
+ * @brief Trait to detect @c reserve method.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Type trait that can be used to know if a type has a
+ * <tt>reserve()</tt> method that is callable with a
+ * single argument of the given type.
+ */
 template<typename T, typename SizeT>
 class has_reserve_method
 {
@@ -82,8 +99,15 @@ public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
 
-// Type trait that can be used to know if a type has a capacity() const method
-// that returns a non-void result.
+/**
+ * @internal
+ * @brief Trait to detect @c capacity method.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Type trait that can be used to know if a type has a
+ * <tt>capacity() const</tt> method that returns a
+ * non-<tt>void</tt> result.
+ */
 template<typename T>
 class has_capacity_const_method
 {
@@ -96,7 +120,14 @@ public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
 
-// Type trait that can be used to know if a type has a shrink_to_fit() method.
+/**
+ * @internal
+ * @brief Trait to detect @c shrink_to_fit method.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Type trait that can be used to know if a type has a
+ * <tt>shrink_to_fit()</tt> method.
+ */
 template<typename T>
 class has_shrink_to_fit_method
 {
@@ -109,15 +140,20 @@ public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
 
-// Proxy predicate that can act on values in a lazy sorted container by using
-// a "value to key" function object to forward the values' keys to a key-based
-// predicate. Can also act on any object that can be interpreted as a "key" by
-// the key-based predicate.
-//
-// Template arguments:
-// V     - Type of values passed to this predicate.
-// VToK  - Predicate that can extract a key for a value.
-// KPred - Key-based predicate to proxy.
+/**
+ * @internal
+ * @brief Predicate that proxies a key-based predicate.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Proxy predicate that can act on values in a lazy sorted container by using
+ * a "value to key" function object to forward the values' keys to a key-based
+ * predicate. Can also act on any object that can be interpreted as a "key" by
+ * the key-based predicate.
+ *
+ * @tparam V Type of values passed to this predicate.
+ * @tparam VToK Predicate that can extract a key for a value.
+ * @tparam KPred Key-based predicate to proxy.
+ */
 template<typename V,
          typename VToK,
          typename KPred>
@@ -152,17 +188,23 @@ public:
     }
 };
 
-// Forward iterator proxy that wraps another forward iterator but converts the
-// reference returned by operator*() to another reference type.
-//
-// Template arguments:
-// It     - Type of iterator to proxy.
-// V      - Type of values returned by It.
-// PubV   - Type of values to publicly return references of. Must be either
-//          V or a base class of V.
-// _ItCat - Iterator category for It. Uses std::iterator_traits by default.
-// _Diff  - Type used for differences between iterators. Uses
-//          std::iterator_traits by default.
+/**
+ * @internal
+ * @brief Forward iterator that publishes a different reference type.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Forward iterator proxy that wraps another forward iterator but converts the
+ * reference returned by <tt>operator*()</tt> to another reference type.
+ *
+ * @tparam It Type of iterator to proxy.
+ * @tparam V Type of values returned by @c It.
+ * @tparam PubV Type of values to publicly return references of.
+ *              Must be either @c V or a base class of @c V.
+ * @tparam _ItCat Iterator category for @c It.
+ *                Uses <tt>std::iterator_traits</tt> by default.
+ * @tparam _Diff Type used for differences between iterators.
+ *               Uses <tt>std::iterator_traits</tt> by default.
+ */
 template<typename It,
          typename V,
          typename PubV,
@@ -248,17 +290,23 @@ public:
     }
 };
 
-// Bidirectional iterator proxy that wraps another bidirectional iterator but
-// converts the reference returned by operator*() to another reference type.
-//
-// Template arguments:
-// It     - Type of iterator to proxy.
-// V      - Type of values returned by It.
-// PubV   - Type of values to publicly return references of. Must be either
-//          V or a base class of V.
-// _ItCat - Iterator category for It. Uses std::iterator_traits by default.
-// _Diff  - Type used for differences between iterators. Uses
-//          std::iterator_traits by default.
+/**
+ * @internal
+ * @brief Bidirectional iterator that publishes a different reference type.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Bidirectional iterator proxy that wraps another bidirectional iterator but
+ * converts the reference returned by <tt>operator*()</tt> to another reference type.
+ *
+ * @tparam It Type of iterator to proxy.
+ * @tparam V Type of values returned by @c It.
+ * @tparam PubV Type of values to publicly return references of.
+ *              Must be either @c V or a base class of @c V.
+ * @tparam _ItCat Iterator category for @c It.
+ *                Uses <tt>std::iterator_traits</tt> by default.
+ * @tparam _Diff Type used for differences between iterators.
+ *               Uses <tt>std::iterator_traits</tt> by default.
+ */
 template<typename It,
          typename V,
          typename PubV,
@@ -331,17 +379,23 @@ public:
     }
 };
 
-// Random-access iterator proxy that wraps another random-access iterator but
-// converts the reference returned by operator*() to another reference type.
-//
-// Template arguments:
-// It     - Type of iterator to proxy.
-// V      - Type of values returned by It.
-// PubV   - Type of values to publicly return references of. Must be either
-//          V or a base class of V.
-// _ItCat - Iterator category for It. Uses std::iterator_traits by default.
-// _Diff  - Type used for differences between iterators. Uses
-//          std::iterator_traits by default.
+/**
+ * @internal
+ * @brief Random-access iterator that publishes a different reference type.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Random-access iterator proxy that wraps another random-access iterator but
+ * converts the reference returned by <tt>operator*()</tt> to another reference type.
+ *
+ * @tparam It Type of iterator to proxy.
+ * @tparam V Type of values returned by @c It.
+ * @tparam PubV Type of values to publicly return references of.
+ *              Must be either @c V or a base class of @c V.
+ * @tparam _ItCat Iterator category for @c It.
+ *                Uses <tt>std::iterator_traits</tt> by default.
+ * @tparam _Diff Type used for differences between iterators.
+ *               Uses <tt>std::iterator_traits</tt> by default.
+ */
 template<typename It,
          typename V,
          typename PubV,
@@ -452,23 +506,31 @@ public:
     }
 };
 
-// Iterator proxy that wraps another iterator but converts the reference returned
-// by operator*() to another reference type. Defined as follows:
-//
-// - If It is a pointer type, then iterator_proxy is PubV*.
-// - Otherwise, if It is a random-access iterator, then iterator_proxy is random_access_iterator_proxy.
-// - Otherwise, if It is a bidirectional iterator, then iterator_proxy is bidirectional_iterator_proxy.
-// - Otherwise, if It is a forward iterator, then iterator_proxy is forward_iterator_proxy.
-// - Otherwise, iterator_proxy is an incomplete type.
-//
-// Template arguments:
-// It     - Type of iterator to proxy.
-// V      - Type of values returned by It.
-// PubV   - Type of values to publicly return references of. Must be either
-//          V or a base class of V.
-// _ItCat - Iterator category for It. Uses std::iterator_traits by default.
-// _Diff  - Type used for differences between iterators. Uses
-//          std::iterator_traits by default.
+/// @cond NEVERSHOWN
+
+/**
+ * @internal
+ * @brief Generic iterator proxy.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Iterator proxy that wraps another iterator but converts the reference returned
+ * by <tt>operator*()</tt> to another reference type. Defined as follows:
+ *
+ * - If @c It is a pointer type, then @c iterator_proxy is <tt>PubV*</tt>.
+ * - Otherwise, if @c It is a random-access iterator, then @c iterator_proxy is @c random_access_iterator_proxy.
+ * - Otherwise, if @c It is a bidirectional iterator, then @c iterator_proxy is @c bidirectional_iterator_proxy.
+ * - Otherwise, if @c It is a forward iterator, then @c iterator_proxy is @c forward_iterator_proxy.
+ * - Otherwise, @c iterator_proxy is an incomplete type.
+ *
+ * @tparam It Type of iterator to proxy.
+ * @tparam V Type of values returned by @c It.
+ * @tparam PubV Type of values to publicly return references of.
+ *              Must be either @c V or a base class of @c V.
+ * @tparam _ItCat Iterator category for @c It.
+ *                Uses <tt>std::iterator_traits</tt> by default.
+ * @tparam _Diff Type used for differences between iterators.
+ *               Uses <tt>std::iterator_traits</tt> by default.
+ */
 template<typename It,
          typename V,
          typename PubV,
@@ -484,20 +546,26 @@ using iterator_proxy = std::conditional_t<std::is_pointer<It>::value,
                                                        forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>,
                                                        incomplete_type>>>>;
 
-// Iterator proxy that can wraps another iterator but convert the reference
-// returned by operator*() to another reference type if needed. Defined as follows:
-//
-// - If PubV is the same type as V, then conditional_iterator_proxy is It.
-// - Otherwise, conditional_iterator_proxy is iterator_proxy.
-//
-// Template arguments:
-// It     - Type of iterator to proxy.
-// V      - Type of values returned by It.
-// PubV   - Type of values to publicly return references of. Must be either
-//          V or a base class of V.
-// _ItCat - Iterator category for It. Uses std::iterator_traits by default.
-// _Diff  - Type used for differences between iterators. Uses
-//          std::iterator_traits by default.
+/**
+ * @internal
+ * @brief Generic conditional iterator proxy.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Iterator proxy that can wraps another iterator but convert the reference
+ * returned by <tt>operator*()</tt> to another reference type if needed. Defined as follows:
+ *
+ * - If @c PubV is the same type as @c V, then @c conditional_iterator_proxy is @c It.
+ * - Otherwise, @c conditional_iterator_proxy is @c iterator_proxy.
+ *
+ * @tparam It Type of iterator to proxy.
+ * @tparam V Type of values returned by @c It.
+ * @tparam PubV Type of values to publicly return references of.
+ *              Must be either @c V or a base class of @c V.
+ * @tparam _ItCat Iterator category for @c It.
+ *                Uses <tt>std::iterator_traits</tt> by default.
+ * @tparam _Diff Type used for differences between iterators.
+ *               Uses <tt>std::iterator_traits</tt> by default.
+ */
 template<typename It,
          typename V,
          typename PubV,
@@ -507,8 +575,18 @@ using conditional_iterator_proxy = std::conditional_t<std::is_same<PubV, V>::val
                                                       It,
                                                       iterator_proxy<It, V, PubV, _ItCat, _Diff>>;
 
-// Helper type that calls sort_if_needed() on a lazy sorted container
-// only if it does not support duplicates.
+/// @endcond
+
+/**
+ * @internal
+ * @brief Helper for @c sort_if_needed.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Helper type that calls <tt>sort_if_needed()</tt> on a lazy sorted container
+ * only if it does not support duplicates.
+ *
+ * @tparam Multi Whether lazy sorted container accepts duplicates.
+ */
 template<bool Multi> struct sort_lazy_container_if_needed_and_not_multi;
 template<> struct sort_lazy_container_if_needed_and_not_multi<true> {
     template<typename LazyC> void operator()(LazyC&) const { }
@@ -517,8 +595,16 @@ template<> struct sort_lazy_container_if_needed_and_not_multi<false> {
     template<typename LazyC> void operator()(LazyC& c) const { c.sort_if_needed(); }
 };
 
-// Helper type that sorts the elements of a lazy sorted container.
-// Implementation differs depending on whether containers accepts duplicates or not.
+/**
+ * @internal
+ * @brief Sort helper for lazy sorted containers.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Helper type that sorts the elements of a lazy sorted container.
+ * Implementation differs depending on whether containers accepts duplicates or not.
+ *
+ * @tparam Multi Whether lazy sorted container accepts duplicates.
+ */
 template<bool Multi> struct sort_lazy_container_elements;
 template<> struct sort_lazy_container_elements<true> {
     template<typename LazyC> void operator()(LazyC& c) const {
@@ -534,10 +620,18 @@ template<> struct sort_lazy_container_elements<false> {
     }
 };
 
-// Helper type that updates a lazy sorted container's sorted_ flag after an
-// insertion at the back of the container, depending on whether the insertion
-// maintained the sorting or not. Use only on sorted containers with more
-// than one element.
+/**
+ * @internal
+ * @brief Helper that updates a lazy sorted container after insertion.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Helper type that updates a lazy sorted container's @c sorted_ flag after an
+ * insertion at the back of the container, depending on whether the insertion
+ * maintained the sorting or not. Use only on sorted containers with more
+ * than one element.
+ *
+ * @tparam Multi Whether lazy sorted container accepts duplicates.
+ */
 template<bool Multi> struct updated_lazy_container_sorted_flag_after_insert;
 template<> struct updated_lazy_container_sorted_flag_after_insert<true> {
     template<typename LazyC> void operator()(LazyC& c) const {
@@ -550,8 +644,16 @@ template<> struct updated_lazy_container_sorted_flag_after_insert<false> {
     }
 };
 
-// Base type of lazy_sorted_container that includes a typedef mapped_type if T
-// is not void, otherwise no typedef. Used to include the typedef for maps only.
+/**
+ * @brief Base class for lazy-sorted containers.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Base type of @c lazy_sorted_container that includes a typedef @c mapped_type if
+ * @c T is not @c void, otherwise no typedef. Used to include the typedef for maps only.
+ *
+ * @tparam T Type of values bound to the container's keys, or @c void if
+ *           the container is not a map.
+ */
 template<typename T> struct mapped_type_base { typedef T mapped_type; };
 template<> struct mapped_type_base<void> { };
 
@@ -572,19 +674,19 @@ template<> struct mapped_type_base<void> { };
  *
  * This class is not thread-safe; furthermore, because it performs on-demand
  * sorting, there are only two ways of using it in a multi-threaded context:
- * @li Protect it with an exclusive mutex like <tt>std::mutex</tt>, or
- * @li Protect it with a shared mutex like <tt>std::shared_mutex</tt> and make sure
- *     that it is always sorted before writer threads release their write locks.
+ * - Protect it with an exclusive mutex like <tt>std::mutex</tt>, or
+ * - Protect it with a shared mutex like <tt>std::shared_mutex</tt> and make sure
+ *   that it is always sorted before writer threads release their write locks.
  *
  * If this container is a map (e.g., type @c T is not @c void), this class will
  * additionally have a @c mapped_type typedef (defined as @c T). Furthermore, if
  * the map does not accept duplicates (e.g., @c Multi is @c false), the following
  * additional methods are included:
  *
- * @li <tt>at</tt>
- * @li <tt>operator[]</tt>
- * @li <tt>insert_or_assign</tt>
- * @li <tt>try_emplace</tt>
+ * - <tt>at</tt>
+ * - <tt>operator[]</tt>
+ * - <tt>insert_or_assign</tt>
+ * - <tt>try_emplace</tt>
  *
  * Note, however, that those methods all require the container to be sorted to
  * work, so they could be less efficient that blind inserts.
@@ -662,11 +764,15 @@ private:
     value_compare vcmp_;                // Value comparator.
     value_equal_to veq_;                // Value equality predictate.
 
+    /// @cond NEVERSHOWN
+
 private:
     // Friend some helper types.
     template<bool _HelperMulti> friend struct sort_lazy_container_if_needed_and_not_multi;
     template<bool _HelperMulti> friend struct sort_lazy_container_elements;
     template<bool _HelperMulti> friend struct updated_lazy_container_sorted_flag_after_insert;
+    
+    /// @endcond
 
 public:
     // Default constructor. Constructs an empty container.
@@ -1204,7 +1310,14 @@ private:
     }
 };
 
-// Predicate that implements "equal to" using a comparator like std::less.
+/**
+ * @internal
+ * @brief Predicate that implements "equal to" using a comparator like <tt>std::less</tt>.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * @tparam T Type of elements to compare.
+ * @tparam _Cmp Comparator to use to implement equality. Defaults to <tt>std::less<T></tt>.
+ */
 template<typename T,
          typename _Cmp = std::less<T>>
 class equal_to_using_less
@@ -1220,8 +1333,17 @@ public:
     }
 };
 
-// Proxy for std::equal_to that has a constructor that accepts an arbitrary
-// unused predicate. Used to bridge with equal_to_using_less.
+/**
+ * @internal
+ * @brief Internal proxy for <tt>std::equal_to</tt>.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Proxy for <tt>std::equal_to</tt> that has a constructor that accepts an arbitrary
+ * unused predicate. Used to bridge with @c equal_to_using_less.
+ *
+ * @tparam T Type of elements to compare.
+ * @tparam _UnusedCmp Comparator to use to implement equality; unused.
+ */
 template<typename T,
          typename _UnusedCmp = std::less<T>>
 struct equal_to_proxy : std::equal_to<T> {
@@ -1229,16 +1351,38 @@ struct equal_to_proxy : std::equal_to<T> {
     explicit equal_to_proxy(const _UnusedCmp&) : equal_to_proxy() { }
 };
 
-// "equal to" predicate that uses operator==() if it's available for the type,
-// otherwise implements it using equal_to_using_less.
+/// @cond NEVERSHOWN
+
+/**
+ * @internal
+ * @brief "Equal to" implementation that tries to be efficient.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * "Equal to" predicate that uses <tt>operator==()</tt> if it's available for the type,
+ * otherwise implements it using @c equal_to_using_less.
+ *
+ * @tparam T Type of elements to compare.
+ * @tparam _Cmp Comparator to use to implement equality if <tt>operator==()</tt>
+ *              is not available. Defaults to <tt>std::less<T></tt>.
+ */
 template<typename T,
          typename _Cmp = std::less<T>>
 using equal_to_using_less_if_needed = std::conditional_t<has_operator_equal<T>::value,
                                                          equal_to_proxy<T, _Cmp>,
                                                          equal_to_using_less<T, _Cmp>>;
 
-// Unary predicate that projects a value reference unmodified.
-// Used as "value "to key" for set-like containers.
+/// @endcond
+
+/**
+ * @internal
+ * @brief Predicate that projects identity.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Unary predicate that projects a value reference unmodified.
+ * Used as "value "to key" for set-like containers.
+ *
+ * @tparam T Type of value to project.
+ */
 template<typename T>
 struct identity {
     const T& operator()(const T& obj) const {
@@ -1246,8 +1390,16 @@ struct identity {
     }
 };
 
-// Unary predicate that projects the reference to a pair's first element.
-// Used as "value to key" for map-like containers.
+/**
+ * @internal
+ * @brief Predicate that projects a pair's first element.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Unary predicate that projects the reference to a <tt>pair</tt>'s @c first element.
+ * Used as "value to key" for map-like containers.
+ *
+ * @tparam P Type of pair to project the first element of.
+ */
 template<typename P>
 struct pair_first {
     decltype(auto) operator()(const P& obj) const {
@@ -1255,13 +1407,24 @@ struct pair_first {
     }
 };
 
-// Specialization of std::pair that supports assigning to the first element
-// even if it is const. This will be used to build lazy std::map-like
-// containers that can copy/move their elements in their internal container.
-//
-// The pair's first element is implicitely const. Use like this:
-//
-//    detail::map_pair<int, float>  // inherits from std::pair<const int, float>
+/**
+ * @internal
+ * @brief Specialization of <tt>std::pair</tt> for map-like lazy-sorted containers.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Specialization of <tt>std::pair</tt> that supports assigning to the first element
+ * even if it is const. This will be used to build lazy <tt>std::map</tt>-like
+ * containers that can copy/move their elements in their internal container.
+ *
+ * The pair's first element is implicitely @c const. Use like this:
+ *
+ * @code
+ *    detail::map_pair<int, float>  // inherits from std::pair<const int, float>
+ * @endcode
+ *
+ * @tparam RT1 Type for the pair's first element. Implicitely @c const (see above).
+ * @tparam T2 Type for the pair's second selement.
+ */
 template<typename RT1,
          typename T2,
          typename _BaseStdPair = std::pair<const RT1, T2>>
@@ -1383,19 +1546,33 @@ public:
     }
 };
 
-// Default allocator type for lazy maps that use map_pair. Will be brought
-// into the coveo::lazy namespace in the map.h header. Can be used to declare
-// lazy map classes with custom allocators without having to reference
-// the internal map_pair class:
-//
-//   // my_custom_allocator must be a template accepting a single type argument
-//   coveo::lazy::map_allocator<key_type, mapped_type, my_custom_allocator>
-//
-// By default, the allocator type is std::allocator.
+/// @cond NEVERSHOWN
+
+/**
+ * @internal
+ * @brief Default allocator for lazy-sorted map containers.
+ * @headerfile lazy_sorted_container.h <coveo/lazy/detail/lazy_sorted_container.h>
+ *
+ * Default allocator type for lazy maps that use @c map_pair. Will be brought
+ * into the <tt>coveo::lazy</tt> namespace in the <tt>map.h</tt> header. Can be used
+ * to declare lazy map classes with custom allocators without having to reference
+ * the internal @c map_pair class:
+ *
+ * @code
+ *   // my_custom_allocator must be a template accepting a single type argument
+ *   coveo::lazy::map_allocator<key_type, mapped_type, my_custom_allocator>
+ * @endcode
+ *
+ * @tparam K Type for the map pair's first element.
+ * @tparam T Type for the map pair's second element.
+ * @tparam _Alloc Type of allocator to use. Defaults to <tt>std::allocator</tt>.
+ */
 template<typename K,
          typename T,
          template<typename _AllocT> typename _Alloc = std::allocator>
 using map_allocator = _Alloc<map_pair<K, T>>;
+
+/// @endcond
 
 } // detail
 } // lazy

@@ -7,12 +7,11 @@
  * mimic the standard C++ containers of the same name, but perform
  * lazy sorting.
  *
- * These definitions are just @c typedefs. For actual implementation,
+ * These definitions are just typedefs. For actual implementation,
  * see <tt>coveo/lazy/detail/lazy_sorted_container.h</tt>.
  *
- * @author Charles Lechasseur <shiftingbeard@gmx.com>
  * @copyright 2015-2016, Coveo Solutions Inc.
- *            Distributed under the Apache License, Version 2.0 (see LICENSE).
+ *            Distributed under the Apache License, Version 2.0 (see <a href="https://github.com/coveo/lazy/blob/master/LICENSE">LICENSE</a>).
  */
 
 #ifndef COVEO_LAZY_MAP_H
@@ -25,13 +24,23 @@
 namespace coveo {
 namespace lazy {
 
-// Default allocator type for lazy maps. Use this to specify a custom allocator
-// for lazy maps or lazy multimaps:
-//
-//   // my_custom_allocator must be a template accepting a single type argument
-//   coveo::lazy::map_allocator<key_type, mapped_type, my_custom_allocator>
-//
-// By default, the allocator type is std::allocator.
+/**
+ * @brief Allocator for lazy maps.
+ *
+ * Default allocator type for lazy maps. Use this to specify a custom allocator
+ * for <tt>coveo::lazy::map</tt> or <tt>coveo::lazy::multimap</tt>:
+ *
+ * @code
+ *   // my_custom_allocator must be a template accepting a single type argument
+ *   coveo::lazy::map_allocator<key_type, mapped_type, my_custom_allocator>
+ * @endcode
+ *
+ * @tparam K Type of keys stored in the map.
+ * @tparam T Type of values stored in the map.
+ * @tparam _Alloc Base allocator actually used to perform allocation. Must be
+ *                a template type accepting a single argument. By default,
+ *                the allocator type is <tt>std::allocator</tt>.
+ */
 template<typename K,
          typename T,
          template<typename _AllocT> typename _Alloc = std::allocator>
@@ -39,6 +48,7 @@ using map_allocator = detail::map_allocator<K, T, _Alloc>;
 
 /**
  * @class coveo::lazy::map
+ * @extends coveo::lazy::detail::lazy_sorted_container
  * @brief Map container that performs lazy sorting.
  * @headerfile map.h <coveo/lazy/map.h>
  *
@@ -46,7 +56,7 @@ using map_allocator = detail::map_allocator<K, T, _Alloc>;
  * container (by default, an <tt>std::vector</tt>) and sorts them only when needed.
  * Sorting can also be triggered on-demand.
  *
- * See <tt>coveo/lazy/detail/lazy_sorted_container.h</tt> for details
+ * See <tt>coveo::lazy::detail::lazy_sorted_container</tt> for details
  * on the actual implementation.
  *
  * This class has the following differences compared to <tt>std::map</tt>:
@@ -96,7 +106,48 @@ template<typename K,
                                            _Impl,
                                            false>;
 
-// Equivalent to the type above, but supports duplicate elements like std::multimap.
+/**
+ * @class coveo::lazy::multimap
+ * @extends coveo::lazy::detail::lazy_sorted_container
+ * @brief Multimap container that performs lazy sorting.
+ * @headerfile map.h <coveo/lazy/map.h>
+ *
+ * <tt>std::multimap</tt>-like container class that stores its elements in an internal
+ * container (by default, an <tt>std::vector</tt>) and sorts them only when needed.
+ * Sorting can also be triggered on-demand.
+ *
+ * Similar to <tt>coveo::lazy::map</tt> but accepts duplicate elements.
+ * Duplicates will appear in insertion order when iterated.
+ *
+ * See <tt>coveo::lazy::detail::lazy_sorted_container</tt> for details
+ * on the actual implementation.
+ *
+ * This class has the following differences compared to <tt>std::multimap</tt>:
+ *
+ * - Because it uses a sequence container internally, elements in the map might
+ *   be moved/copied when an insertion occurs. Thus, this class cannot be used
+ *   to store move-only types.
+ * - It needs a predicate to determine if two map keys are equal. If an
+ *   <tt>operator==</tt> exists to compare instances of type @c K, it will be
+ *   used; otherwise, it will use an implementation that uses @c key_compare
+ *   to determine equality. This is less efficient; if a custom equality
+ *   predicate exists for type @c K, it should be used for the @c _Eq template
+ *   parameter.
+ * - Modifier methods do not return iterators. This is done to better
+ *   support lazy sorting.
+ *
+ * @tparam K Type of keys stored in the map.
+ * @tparam T Type of values stored in the map.
+ * @tparam _Cmp Predicate used to sort the keys.
+ *              Defaults to <tt>std::less<K></tt>.
+ * @tparam _Impl Type of sequence container used by the map.
+ *               Defaults to <tt>std::vector</tt>.
+ * @tparam _Eq Predicate used to determine if keys are equal.
+ *             Defaults to using <tt>operator==</tt> if available,
+ *             otherwise to an implementation that uses @c _Cmp (see above).
+ * @tparam _Alloc Allocator used for the map elements.
+ *                Defaults to @c map_allocator.
+ */
 template<typename K,
          typename T,
          typename _Cmp = std::less<K>,
