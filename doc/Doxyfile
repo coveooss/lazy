@@ -107,7 +107,7 @@ BRIEF_MEMBER_DESC      = YES
 # brief descriptions will be completely suppressed.
 # The default value is: YES.
 
-REPEAT_BRIEF           = YES
+REPEAT_BRIEF           = NO
 
 # This tag implements a quasi-intelligent brief description abbreviator that is
 # used to form the text in various listings. Each string in this list, if found
@@ -570,7 +570,7 @@ INLINE_INFO            = YES
 # name. If set to NO, the members will appear in declaration order.
 # The default value is: YES.
 
-SORT_MEMBER_DOCS       = YES
+SORT_MEMBER_DOCS       = NO
 
 # If the SORT_BRIEF_DOCS tag is set to YES then doxygen will sort the brief
 # descriptions of file, namespace and class members alphabetically by member

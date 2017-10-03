@@ -654,7 +654,12 @@ template<> struct updated_lazy_container_sorted_flag_after_insert<false> {
  * @tparam T Type of values bound to the container's keys, or @c void if
  *           the container is not a map.
  */
-template<typename T> struct mapped_type_base { typedef T mapped_type; };
+template<typename T> struct mapped_type_base {
+    /**
+     * @brief Type of values stored in the map. Absent for set-like containers.
+     */
+    typedef T mapped_type;
+};
 template<> struct mapped_type_base<void> { };
 
 /**
@@ -683,10 +688,10 @@ template<> struct mapped_type_base<void> { };
  * the map does not accept duplicates (e.g., @c Multi is @c false), the following
  * additional methods are included:
  *
- * - <tt>at</tt>
+ * - <tt>at()</tt>
  * - <tt>operator[]</tt>
- * - <tt>insert_or_assign</tt>
- * - <tt>try_emplace</tt>
+ * - <tt>insert_or_assign()</tt>
+ * - <tt>try_emplace()</tt>
  *
  * Note, however, that those methods all require the container to be sorted to
  * work, so they could be less efficient that blind inserts.
@@ -726,36 +731,203 @@ template<typename K,
 class lazy_sorted_container : public mapped_type_base<T>
 {
 public:
-    // Types for the internal container
-    typedef Impl<V, Alloc>                                                                      container_impl;
-    typedef typename container_impl::iterator                                                   iterator_impl;
-    typedef typename container_impl::const_iterator                                             const_iterator_impl;
-    typedef typename container_impl::reverse_iterator                                           reverse_iterator_impl;
-    typedef typename container_impl::const_reverse_iterator                                     const_reverse_iterator_impl;
+    /**
+     * @brief Type of container used internally.
+     *
+     * Type of container used internally to store the elements. Usually a contiguous container offering
+     * efficient insertion at the back. Defaults to <tt>std::vector</tt>.
+     */
+    using container_impl = Impl<V, Alloc>;
+
+    /**
+     * @brief Internal container's @c iterator implementation.
+     *
+     * Implementation of @c iterator by the internal container. Not used directly,
+     * but conditionally to define <tt>lazy_sorted_container::iterator</tt>.
+     */
+    using iterator_impl = typename container_impl::iterator;
+
+    /**
+     * @brief Internal container's @c const_iterator implementation.
+     *
+     * Implementation of @c const_iterator by the internal container. Not used directly,
+     * but conditionally to define <tt>lazy_sorted_container::const_iterator</tt>.
+     */
+    using const_iterator_impl = typename container_impl::const_iterator;
+
+    /**
+     * @brief Internal container's @c reverse_iterator implementation.
+     *
+     * Implementation of @c reverse_iterator by the internal container. Not used directly,
+     * but conditionally to define <tt>lazy_sorted_container::reverse_iterator</tt>.
+     */
+    using reverse_iterator_impl = typename container_impl::reverse_iterator;
+
+    /**
+     * @brief Internal container's @c const_reverse_iterator implementation.
+     *
+     * Implementation of @c const_reverse_iterator by the internal container.
+     * Not used directly, but conditionally to define <tt>lazy_sorted_container::const_reverse_iterator</tt>.
+     */
+    using const_reverse_iterator_impl = typename container_impl::const_reverse_iterator;
     
-    // Types that are usually found in associative containers, like std::set/map
-    typedef K                                                                                   key_type;
-    typedef PubV                                                                                value_type;
-    typedef typename container_impl::size_type                                                  size_type;
-    typedef typename container_impl::difference_type                                            difference_type;
-    typedef VToK                                                                                value_to_key;
-    typedef KCmp                                                                                key_compare;
-    typedef lazy_value_pred_proxy<value_type, value_to_key, key_compare>                        value_compare;
-    typedef KEq                                                                                 key_equal_to;
-    typedef lazy_value_pred_proxy<value_type, value_to_key, key_equal_to>                       value_equal_to;
-    typedef typename container_impl::allocator_type                                             allocator_type;
-    typedef std::conditional_t<std::is_void<T>::value, const value_type&, value_type&>          reference;
-    typedef const value_type&                                                                   const_reference;
-    typedef std::conditional_t<std::is_void<T>::value, const value_type*, value_type*>          pointer;
-    typedef const value_type*                                                                   const_pointer;
-    typedef std::conditional_t<std::is_void<T>::value,
-                               conditional_iterator_proxy<const_iterator_impl, const V, const PubV>,
-                               conditional_iterator_proxy<iterator_impl, V, PubV>>              iterator;
-    typedef conditional_iterator_proxy<const_iterator_impl, const V, const PubV>                const_iterator;
-    typedef std::conditional_t<std::is_void<T>::value,
-                               conditional_iterator_proxy<const_reverse_iterator_impl, const V, const PubV>,
-                               conditional_iterator_proxy<reverse_iterator_impl, V, PubV>>      reverse_iterator;
-    typedef conditional_iterator_proxy<const_reverse_iterator_impl, const V, const PubV>        const_reverse_iterator;
+    /**
+     * @brief Type of keys used by the container.
+     *
+     * Type of keys used in the container. For sets, this is the same as <tt>lazy_sorted_container::value_type</tt>;
+     * for maps, this is a different type. Keys are used to perform lookups in the container
+     * (e.g. <tt>find()</tt>, <tt>lower_bound()</tt>, etc.)
+     */
+    using key_type = K;
+
+    /**
+     * @brief Type of elements stored in the container.
+     *
+     * Type of the elements, or "values", stored in the container. For sets, this is the
+     * same type as <tt>lazy_sorted_container::key_type</tt>; for maps, this corresponds
+     * to a key/value pair.
+     */
+    using value_type = PubV;
+
+    /**
+     * @brief Type used to represent size of container.
+     *
+     * Type used to represent the size of the container, e.g. the number of elements it contains.
+     * Corresponds to the type used by the internal container (usually <tt>std::size_t</tt>).
+     */
+    using size_type = typename container_impl::size_type;
+
+    /**
+     * @brief Type used to represent difference in the container.
+     *
+     * Type used to represent the difference between two positions in the container.
+     * Corresponds to the type used by the internal container (usually <tt>std::ptrdiff_t</tt>).
+     */
+    using difference_type = typename container_impl::difference_type;
+
+    /**
+     * @brief Predicate to get keys from values.
+     *
+     * Predicate that, given a container element or "value", can extract its key. This is used
+     * internally to keep values sorted. For sets, this predicate simply returns the value itself;
+     * for maps, it returns the pair's @c first member.
+     */
+    using value_to_key = VToK;
+
+    /**
+     * @brief Predicate to compare keys.
+     *
+     * Predicate that can compare keys and tell if one is "less" (e.g. goes before) the other.
+     * This predicate must impose a strict ordering of the keys. Used internally to keep values
+     * sorted and to perform lookups.
+     */
+    using key_compare = KCmp;
+
+    /**
+     * @brief Predicate to compare values.
+     *
+     * Same as <tt>lazy_sorted_container::key_compare</tt>, but compares values directly
+     * by using <tt>lazy_sorted_container::value_to_key</tt> to extract a key for each
+     * value compared.
+     */
+    using value_compare = lazy_value_pred_proxy<value_type, value_to_key, key_compare>;
+
+    /**
+     * @brief Predicate to check keys for equality.
+     *
+     * Predicate that can compare keys and if one is equal to the other. Used internally
+     * to identify duplicates if needed (e.g., not a @c multimap or @c multiset).
+     */
+    using key_equal_to = KEq;
+
+    /**
+     * @brief Predicate to check values for equality.
+     *
+     * Same as <tt>lazy_sorted_container::key_equal_to</tt>, but compares values directly
+     * by using <tt>lazy_sorted_container::value_to_key</tt> to extract a key for each
+     * value compared.
+     */
+    using value_equal_to = lazy_value_pred_proxy<value_type, value_to_key, key_equal_to>;
+
+    /**
+     * @brief Type of allocator used.
+     *
+     * Type of allocator used to allocate memory in the container. Defaults to the
+     * allocator used by the internal container, which is usually <tt>std::allocator</tt>
+     * in the end.
+     */
+    using allocator_type = typename container_impl::allocator_type;
+
+    /**
+     * @brief Type of reference returned by <tt>iterator</tt>s.
+     *
+     * Type of reference returned by the container's <tt>iterator</tt>s. For maps, this is
+     * a non-const reference that allows the caller to modify an element; for sets,
+     * this is a const reference and this is similar to <tt>lazy_sorted_container::const_reference</tt>.
+     */
+    using reference = std::conditional_t<std::is_void<T>::value, const value_type&, value_type&>;
+
+    /**
+     * @brief Type of reference returned by <tt>const_iterator</tt>s.
+     *
+     * Type of reference returned by the container's <tt>const_iterator</tt>s. Always a
+     * const reference regardless of container type.
+     */
+    using const_reference = const value_type&;
+
+    /**
+     * @brief Type of pointer corresponding to @c reference.
+     *
+     * Type of pointer corresponding to <tt>lazy_sorted_container::reference</tt>. For map, this
+     * points to a non-const value that can be modified; for sets, this points to a const value
+     * and this is similar to <tt>lazy_sorted_container::const_pointer</tt>.
+     */
+    using pointer = std::conditional_t<std::is_void<T>::value, const value_type*, value_type*>;
+
+    /**
+     * @brief Type of pointer corresponding to @c const_reference.
+     *
+     * Type of pointer corresponding to <tt>lazy_sorted_container::const_reference</tt>.
+     * Always points to a const value regardless of container type.
+     */
+    using const_pointer = const value_type*;
+
+    /**
+     * @brief Iterator for the container.
+     *
+     * Iterator type for this container. For maps, returns non-const references and allows
+     * elements to be modified; for sets, this is similar to <tt>lazy_sorted_container::const_iterator</tt>.
+     */
+    using iterator = std::conditional_t<std::is_void<T>::value,
+                                        conditional_iterator_proxy<const_iterator_impl, const V, const PubV>,
+                                        conditional_iterator_proxy<iterator_impl, V, PubV>>;
+
+    /**
+     * @brief Const iterator for the container.
+     *
+     * Const iterator type for this container. Always returns const references to the elements
+     * regardless of container type.
+     */
+    using const_iterator = conditional_iterator_proxy<const_iterator_impl, const V, const PubV>;
+
+    /**
+     * @brief Reverse iterator for the container.
+     *
+     * Iterator type for this container allowing reverse iteration. For maps, returns non-const
+     * references and allows elements to be modified; for sets, this is similar to
+     * <tt>lazy_sorted_container::const_reverse_iterator</tt>.
+     */
+    using reverse_iterator = std::conditional_t<std::is_void<T>::value,
+                                                conditional_iterator_proxy<const_reverse_iterator_impl, const V, const PubV>,
+                                                conditional_iterator_proxy<reverse_iterator_impl, V, PubV>>;
+
+    /**
+     * @brief Const reverse iterator for the container.
+     *
+     * Const iterator type for this container allowing reverse iteration. Always returns
+     * const references to the elements regardless of container type.
+     */
+    using const_reverse_iterator = conditional_iterator_proxy<const_reverse_iterator_impl, const V, const PubV>;
 
 private:
     mutable container_impl elements_;   // Container storing actual elements.
@@ -775,18 +947,56 @@ private:
     /// @endcond
 
 public:
-    // Default constructor. Constructs an empty container.
+    /**
+     * @brief Default constructor.
+     *
+     * Default constructor. Creates an empty container with default predicates.
+     */
     lazy_sorted_container()
         : lazy_sorted_container(key_compare()) { }
+
+    /**
+     * @brief Constructor with key comparator.
+     *
+     * Constructor with a specific key comparator instance.
+     *
+     * @param kcmp @c key_compare instance to use for this container.
+     * @param alloc @c allocator_type instance to use for this container. Defaults to
+     *              a default-constructed <tt>lazy_sorted_container::allocator_type</tt>.
+     * @param keq @c key_equal_to instance to use for this container. Defaults to
+     *            a default-constructed <tt>lazy_sorted_container::key_equal_to</tt>.
+     */
     explicit lazy_sorted_container(const key_compare& kcmp,
                                    const allocator_type& alloc = allocator_type(),
                                    const key_equal_to& keq = key_equal_to())
         : elements_(alloc), sorted_(true),
           vtok_(), vcmp_(vtok_, kcmp),  veq_(vtok_, keq) { }
+
+    /**
+     * @brief Constructor with allocator.
+     *
+     * Constructor with a specific allocator instance.
+     *
+     * @param alloc @c allocator_type instance to use for this container.
+     */
     explicit lazy_sorted_container(const allocator_type& alloc)
         : lazy_sorted_container(key_compare(), alloc) { }
 
-    // Range constructor. Constructs a container with elements in the range [first, last[.
+    /**
+     * @brief Range constructor.
+     *
+     * Constructor that initializes the container with the elements in the
+     * range <tt>[first, last[</tt>.
+     *
+     * @param first Beginning of the range of elements to insert in the container (inclusive).
+     * @param last End of the range of elements to insert in the container (exclusive).
+     * @param kcmp @c key_compare instance to use for this container. Defaults to
+     *             a default-constructed <tt>lazy_sorted_container::key_compare</tt>.
+     * @param alloc @c allocator_type instance to use for this container. Defaults to
+     *              a default-constructed <tt>lazy_sorted_container::allocator_type</tt>.
+     * @param keq @c key_equal_to instance to use for this container. Defaults to
+     *            a default-constructed <tt>lazy_sorted_container::key_equal_to</tt>.
+     */
     template<typename It> lazy_sorted_container(It first,
                                                 It last,
                                                 const key_compare& kcmp = key_compare(),
@@ -794,41 +1004,124 @@ public:
                                                 const key_equal_to& keq = key_equal_to())
         : elements_(first, last, alloc), sorted_(elements_.size() <= 1),
           vtok_(), vcmp_(vtok_, kcmp), veq_(vtok_, keq) { }
+
+    /**
+     * @brief Range constructor with allocator.
+     *
+     * Constructor that initializes the container with the elements in the
+     * range <tt>[first, last[</tt>. Also initializes the allocator.
+     *
+     * @param first Beginning of the range of elements to insert in the container (inclusive).
+     * @param last End of the range of elements to insert in the container (exclusive).
+     * @param alloc @c allocator_type instance to use for this container.
+     */
     template<typename It> lazy_sorted_container(It first,
                                                 It last,
                                                 const allocator_type& alloc)
         : lazy_sorted_container(first, last, key_compare(), alloc) { }
 
-    // Copy constructor. Copies the content of another container, optionally replacing the allocator.
+    /**
+     * @brief Copy constructor.
+     *
+     * Copy constructor. Copies the elements of another container of the same type.
+     *
+     * @param obj Container to copy.
+     */
     lazy_sorted_container(const lazy_sorted_container& obj) = default;
+
+    /**
+     * @brief Copy constructor with allocator.
+     *
+     * Constructor that copies the elements of another container but uses a
+     * different allocator instance.
+     *
+     * @param obj Container to copy. Everything is copied except its allocator.
+     * @param alloc @c allocator_type instance  to use for this container.
+     */
     lazy_sorted_container(const lazy_sorted_container& obj, const allocator_type& alloc)
         : elements_(obj.elements_, alloc), sorted_(obj.sorted_),
           vtok_(obj.vtok_), vcmp_(obj.vcmp_), veq_(obj.veq_) { }
 
-    // Move constructor. Moves the content of another container, optionally replacing the allocator.
+    /**
+     * @brief Move constructor.
+     *
+     * Move constructor. Moves the elements of another container into this one; no copy is performed.
+     *
+     * @param obj Container to move in this one.
+     */
     lazy_sorted_container(lazy_sorted_container&& obj)
         : elements_(std::move(obj.elements_)), sorted_(obj.sorted_),
           vtok_(std::move(obj.vtok_)), vcmp_(std::move(obj.vcmp_)), veq_(std::move(obj.veq_)) {
         obj.sorted_ = true;
     }
+
+    /**
+     * @brief Move constructor with allocator.
+     *
+     * Constructor that moves the elements of another container in this one
+     * but uses a different allocator instance.
+     *
+     * @param obj Container to move in this one. Its allocator is not moved.
+     * @param alloc @c allocator_type instance to use for this container.
+     */
     lazy_sorted_container(lazy_sorted_container&& obj, const allocator_type& alloc)
         : elements_(std::move(obj.elements_), alloc), sorted_(obj.sorted_),
           vtok_(std::move(obj.vtok_)), vcmp_(std::move(obj.vcmp_)), veq_(std::move(obj.veq_)) {
         obj.sorted_ = true;
     }
 
-    // Initializer-list constructor. Constructs a container with elements from an std::initializer_list.
+    /**
+     * @brief Initializer list constructor.
+     *
+     * Constructor that initializes the container with the elements in the
+     * given @c initializer_list.
+     *
+     * @param init @c initializer_list containing container's initial elements.
+     * @param kcmp @c key_compare instance to use for this container. Defaults to
+     *             a default-constructed <tt>lazy_sorted_container::key_compare</tt>.
+     * @param alloc @c allocator_type instance to use for this container. Defaults to
+     *              a default-constructed <tt>lazy_sorted_container::allocator_type</tt>.
+     * @param keq @c key_equal_to instance to use for this container. Defaults to
+     *            a default-constructed <tt>lazy_sorted_container::key_equal_to</tt>.
+     */
     lazy_sorted_container(std::initializer_list<value_type> init,
                           const key_compare& kcmp = key_compare(),
                           const allocator_type& alloc = allocator_type(),
                           const key_equal_to& keq = key_equal_to())
         : lazy_sorted_container(std::begin(init), std::end(init), kcmp, alloc, keq) { }
+
+    /**
+     * @brief Initializer list constructor with allocator.
+     *
+     * Constructor that initializes the container with the elements in the
+     * given @c initializer_list. Also specifies an allocator instance.
+     *
+     * @param init @c initializer_list containing container's initial elements.
+     * @param alloc @c allocator_type instance to use for this container.
+     */
     lazy_sorted_container(std::initializer_list<value_type> init,
                           const allocator_type& alloc)
         : lazy_sorted_container(std::begin(init), std::end(init), alloc) { }
 
-    // Assignment operators. Copies or moves content from another container or an std::initializer_list.
+    /**
+     * @brief Assignment operator.
+     *
+     * Assignment operator. Copies the elements of the given container.
+     *
+     * @param obj Container to copy.
+     * @return Reference to @c this container.
+     */
     lazy_sorted_container& operator=(const lazy_sorted_container& obj) = default;
+
+    /**
+     * @brief Move assignment operator.
+     *
+     * Move assignment operator. Moves the elements of the given container into
+     * this one; no copy is performed.
+     *
+     * @param obj Container to move in this one.
+     * @return Reference to @c this container.
+     */
     lazy_sorted_container& operator=(lazy_sorted_container&& obj) {
         elements_ = std::move(obj.elements_);
         sorted_ = obj.sorted_;
@@ -838,6 +1131,16 @@ public:
         obj.sorted_ = true;
         return *this;
     }
+
+    /**
+     * @brief Assignment operator from initializer list.
+     *
+     * Assignment operator that copies the elements in the given @c initializer_list
+     * into this container, replacing its content.
+     *
+     * @param init @c initializer_list containing the elements to copy in this container.
+     * @return Reference to @c this container.
+     */
     lazy_sorted_container& operator=(std::initializer_list<value_type> init) {
         elements_.clear();
         elements_.insert(elements_.cend(), std::begin(init), std::end(init));
@@ -848,6 +1151,18 @@ public:
     // Equality operators. Validates that both containers have the same elements.
     // Note: does not use key_equal_to to compare elements; elements must be EqualityComparable for this to work.
     // For more information, see http://en.cppreference.com/w/cpp/concept/EqualityComparable
+
+    /**
+     * @brief Equality operator.
+     *
+     * Operator that verifies if two containers contain the same elements. Note: does not use
+     * @c key_equal_to to compare the elements; elements must be @c EqualityComparable for this
+     * to work. For more info, see http://en.cppreference.com/w/cpp/concept/EqualityComparable
+     *
+     * @param left First container to compare.
+     * @param right Second container to compare.
+     * @return @c true if @c left contains the same elements as @c right.
+     */
     friend bool operator==(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         // We need both containers to be sorted for this to work.
         left.sort_if_needed();
@@ -855,13 +1170,33 @@ public:
         return std::equal(left.elements_.cbegin(), left.elements_.cend(),
                           right.elements_.cbegin(), right.elements_.cend());
     }
+    
+    /**
+     * @brief Inequality operator.
+     *
+     * Operator that verifies if two containers have different elements. For more info, see
+     * <tt>lazy_sorted_container::operator==</tt>.
+     *
+     * @param left First container to compare.
+     * @param right Second container to compare.
+     * @return @c true if @c left does not contain the same elements as @c right.
+     */
     friend bool operator!=(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         return !(left == right);
     }
 
-    // Comparison operators. Performs a lexicographical comparison of two containers.
-    // Note: does not use key_compare to compare elements; elements must be LessThanComparable for this to work.
-    // For more information, see http://en.cppreference.com/w/cpp/concept/LessThanComparable
+    /**
+     * @brief "Less than" comparison operator.
+     *
+     * Operator that verifies if a container is "less than" another by performing a lexicographical
+     * comparison of the elements. Note: does not use @c key_compare to compare the elements;
+     * elements must be @c LessThanComparable for this to work. For more info, see
+     * http://en.cppreference.com/w/cpp/concept/LessThanComparable
+     *
+     * @param left First container to compare.
+     * @param right Second container to compare.
+     * @return @c true if @c left is "less than" @c right.
+     */
     friend bool operator<(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         // We need both containers to be sorted for this to work.
         left.sort_if_needed();
@@ -869,17 +1204,60 @@ public:
         return std::lexicographical_compare(left.elements_.cbegin(), left.elements_.cend(),
                                             right.elements_.cbegin(), right.elements_.cend());
     }
+
+    /**
+     * @brief "Less than or equal to" comparison operator.
+     *
+     * Operator that verifies if a container is "less than or equal to" another.
+     * For more information, see <tt>lazy_sorted_container::operator< </tt>.
+     *
+     * @param left First container to compare.
+     * @param right Second container to compare.
+     * @return @c true if @left is "less than or equal to" @c right.
+     */
     friend bool operator<=(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         return !(right < left);
     }
+
+    /**
+     * @brief "Greater than" comparison operator.
+     *
+     * Operator that verifies if a container is "greater than" another.
+     * For more information, see <tt>lazy_sorted_container::operator< </tt>.
+     *
+     * @param left First container to compare.
+     * @param right Second container to compare.
+     * @return @c true if @left is "greater than" @c right.
+     */
     friend bool operator>(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         return right < left;
     }
+
+    /**
+     * @brief "Greater than or equal to" comparison operator.
+     *
+     * Operator that verifies if a container is "greater than or equal to" another.
+     * For more information, see <tt>lazy_sorted_container::operator< </tt>.
+     *
+     * @param left First container to compare.
+     * @param right Second container to compare.
+     * @return @c true if @left is "greater than or equal to" @c right.
+     */
     friend bool operator>=(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         return !(left < right);
     }
 
-    // Element access (only available for non-multi maps).
+    /**
+     * @brief Accesses an existing element.
+     *
+     * Returns a reference to the existing element with the given key.
+     * If the container does not have such an element, an exception is thrown.
+     *
+     * @param key Key of element to look for.
+     * @return Reference to the existing element associated with @c key.
+     * @throw coveo::lazy::out_of_range No element with that key exists.
+     * @remarks This method is only available for non-multi maps.
+     */
     template<typename _T = T,
              typename _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
     _TRef at(const key_type& key) {
@@ -891,6 +1269,18 @@ public:
         }
         return it->second;
     }
+
+    /**
+     * @brief Accesses an existing element (const version).
+     *
+     * Returns a const reference to the existing element with the given key.
+     * If the container does not have such an element, an exception is thrown.
+     *
+     * @param key Key of element to look for.
+     * @return Const reference to the existing element associated with @c key.
+     * @throw coveo::lazy::out_of_range No element with that key exists.
+     * @remarks This method is only available for non-multi maps.
+     */
     template<typename _T = T,
              typename _CTRef = std::enable_if_t<_IsNonMultiMap, const _T&>>
     _CTRef at(const key_type& key) const {
@@ -902,18 +1292,56 @@ public:
         }
         return cit->second;
     }
+
+    /**
+     * @brief Accesses an element, possibly creating it.
+     *
+     * Returns a reference to the element with the given key. If the
+     * container does not have such an element, a default-constructed
+     * one is added and its reference is returned.
+     *
+     * @param key Key of element to look for.
+     * @return Reference to the element associated with @c key.
+     * @remarks This method is only available for non-multi maps.
+     */
     template<typename _T = T,
              typename _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
     _TRef operator[](const key_type& key) {
         return operator_brackets_impl(key);
     }
+
+    /**
+     * @brief Accesses an element, possibly creating it (move version).
+     *
+     * Returns a reference to the element with the given key. If the
+     * container does not have such an element, a default-constructed
+     * one is added and associated with a key that is move-constructed
+     * from @c key.
+     *
+     * @param key Key of element to look for. If the element does not
+     *            exist, the key is moved to the container and associated
+     *            with the new element.
+     * @return Reference to the element associated with @c key.
+     * @remarks This method is only available for non-multi maps.
+     */
     template<typename _T = T,
              typename _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
     _TRef operator[](key_type&& key) {
         return operator_brackets_impl(std::move(key));
     }
 
-    // Methods to obtain iterators.
+    /**
+     * @brief Iterator to beginning of container.
+     *
+     * Returns an <tt>lazy_sorted_container::iterator</tt> that points to the
+     * beginning of this container. Together with <tt>lazy_sorted_container::end()</tt>,
+     * it can be used to enumerate the container's elements.
+     *
+     * The iterator allows elements to be modified if this container is a map.
+     *
+     * @return @c iterator to beginning of container.
+     * @see lazy_sorted_container::end
+     */
     iterator begin() {
         // Container always needs to be sorted when we iterate.
         sort_if_needed();
@@ -921,79 +1349,300 @@ public:
         // an implicit converting constructor from the proxied iterator type.
         return elements_.begin();
     }
+
+    /**
+     * @brief Iterator to beginning of container (const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
+     * the beginning of this container. Together with <tt>lazy_sorted_container::end()</tt>,
+     * it can be used to enumerate the container's elements.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_iterator to beginning of container.
+     * @see lazy_sorted_container::end
+     */
     const_iterator begin() const {
         return cbegin();
     }
+
+    /**
+     * @brief Iterator to beginning of container (const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
+     * the beginning of this container. Together with <tt>lazy_sorted_container::cend()</tt>,
+     * it can be used to enumerate the container's elements.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_iterator to beginning of container.
+     * @remark This method can be used to get a @c const_iterator for a
+     *         container even if the container itself is not @c const.
+     * @see lazy_sorted_container::cend
+     */
     const_iterator cbegin() const {
         sort_if_needed();
         return elements_.cbegin();
     }
+
+    /**
+     * @brief Iterator to end of container.
+     *
+     * Returns an <tt>lazy_sorted_container::iterator</tt> that points to
+     * the end of this container. Together with <tt>lazy_sorted_container::begin()</tt>,
+     * it can be used to enumerate the container's elements.
+     *
+     * The iterator allows elements to be modified if this container is a map.
+     *
+     * @return @c iterator to end of container.
+     * @see lazy_sorted_container::begin
+     */
     iterator end() {
         sort_if_needed();
         return elements_.end();
     }
+
+    /**
+     * @brief Iterator to end of container (const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
+     * the end of this container. Together with <tt>lazy_sorted_container::begin()</tt>,
+     * it can be used to enumerate the container's elements.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_iterator to end of container.
+     * @see lazy_sorted_container::begin
+     */
     const_iterator end() const {
         return cend();
     }
+
+    /**
+     * @brief Iterator to end of container (const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
+     * the end of this container. Together with <tt>lazy_sorted_container::cbegin()</tt>,
+     * it can be used to enumerate the container's elements.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_iterator to end of container.
+     * @remark This method can be used to get a @c const_iterator for a
+     *         container even if the container itself is not @c const.
+     * @see lazy_sorted_container::cbegin
+     */
     const_iterator cend() const {
         sort_if_needed();
         return elements_.cend();
     }
 
+    /**
+     * @brief Iterator to beginning of container (in reverse).
+     *
+     * Returns a <tt>lazy_sorted_container::reverse_iterator</tt> that points to the
+     * beginning of a reverse view of this container. Together with
+     * <tt>lazy_sorted_container::rend()</tt>, it can be used to enumerate
+     * the container's elements, but in reverse.
+     *
+     * The iterator allows elements to be modified if this container is a map.
+     *
+     * @return @c reverse_iterator to beginning of container's reverse view.
+     * @see lazy_sorted_container::rend
+     */
     reverse_iterator rbegin() {
         sort_if_needed();
         return elements_.rbegin();
     }
+
+    /**
+     * @brief Iterator to beginning of container (in reverse - const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
+     * points to the beginning of a reverse view of this container. Together with
+     * <tt>lazy_sorted_container::rend()</tt>, it can be used to enumerate
+     * the container's elements, but in reverse.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_reverse_iterator to beginning of container's reverse view.
+     * @see lazy_sorted_container::rend
+     */
     const_reverse_iterator rbegin() const {
         return crbegin();
     }
+
+    /**
+     * @brief Iterator to beginning of container (in reverse - const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
+     * points to the beginning of a reverse view of this container. Together with
+     * <tt>lazy_sorted_container::crend()</tt>, it can be used to enumerate
+     * the container's elements, but in reverse.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_reverse_iterator to beginning of container's reverse view.
+     * @remark This method can be used to get a @c const_reverse_iterator for a
+     *         container even if the container itself is not @c const.
+     * @see lazy_sorted_container::crend
+     */
     const_reverse_iterator crbegin() const {
         sort_if_needed();
         return elements_.crbegin();
     }
+
+    /**
+     * @brief Iterator to end of container (in reverse).
+     *
+     * Returns a <tt>lazy_sorted_container::reverse_iterator</tt> that points to
+     * the end of a reverse view of this container. Together with
+     * <tt>lazy_sorted_container::rbegin()</tt>, it can be used to enumerate
+     * the container's elements, but in reverse.
+     *
+     * The iterator allows elements to be modified if this container is a map.
+     *
+     * @return @c reverse_iterator to end of container.
+     * @see lazy_sorted_container::rbegin
+     */
     reverse_iterator rend() {
         sort_if_needed();
         return elements_.rend();
     }
+
+    /**
+     * @brief Iterator to end of container (in reverse - const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
+     * points to the end of a reverse view of this container. Together with
+     * <tt>lazy_sorted_container::rbegin()</tt>, it can be used to enumerate
+     * the container's elements, but in reverse.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_reverse_iterator to end of container.
+     * @see lazy_sorted_container::rbegin
+     */
     const_reverse_iterator rend() const {
         return crend();
     }
+
+    /**
+     * @brief Iterator to end of container (in reverse - const version).
+     *
+     * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
+     * points to the end of a reverse view of this container. Together with
+     * <tt>lazy_sorted_container::crbegin()</tt>, it can be used to enumerate
+     * the container's elements, but in reverse.
+     *
+     * The iterator does not allow elements to be modified.
+     *
+     * @return @c const_reverse_iterator to end of container.
+     * @remark This method can be used to get a @c const_reverse_iterator for a
+     *         container even if the container itself is not @c const.
+     * @see lazy_sorted_container::crbegin
+     */
     const_reverse_iterator crend() const {
         sort_if_needed();
         return elements_.crend();
     }
 
-    // Size / capacity
+    /**
+     * @brief Checks if container is empty.
+     *
+     * Checks if the container is empty.
+     *
+     * @return @c true if the container has no element.
+     */
     bool empty() const {
         return elements_.empty();
     }
+
+    /**
+     * @brief Returns container's size.
+     *
+     * Returns the number of elements stored in the container.
+     *
+     * @return Number of elements in the container.
+     */
     size_type size() const {
         // If we're not sorted and this container does not accept duplicates, we have no choice but to sort.
         sort_lazy_container_if_needed_and_not_multi<Multi>()(*this);
         return elements_.size();
     }
+
+    /**
+     * @brief Returns container's max size.
+     *
+     * Returns the maximum number of elements that can be stored by the
+     * container. This might be limited due to internal implementation,
+     * element size, etc.
+     *
+     * @return Maximum number of elements that can be stored in the container.
+     */
     size_type max_size() const {
         return elements_.max_size();
     }
 
-    // Optional methods pertaining to capacity
-    // Only available if the internal container supports them.
+    /**
+     * @brief Reserves capacity in the container.
+     *
+     * Reserves memory in the container for the given number of elements.
+     *
+     * When planning to add a large number of elements whose count is
+     * known in advance, reserving the space can save on reallocation.
+     *
+     * @param new_cap New required capacity. The final capacity after
+     *                the call is implementation-specific, but guaranteed
+     *                to be at least equal to @c new_cap.
+     * @remark This method is only available if the internal container implementation
+     *         (e.g. <tt>lazy_sorted_container::container_impl</tt>) supports it.
+     */
     template<typename = std::enable_if_t<has_reserve_method<container_impl, size_type>::value, void>>
     void reserve(size_type new_cap) {
         elements_.reserve(new_cap);
     }
+
+    /**
+     * @brief Returns container's capacity.
+     *
+     * Returns the container's capacity, e.g. how many elements it can contain
+     * before having to reallocate memory somehow. This value will be greater
+     * than or equal to that returned by <tt>lazy_sorted_container::size()</tt>.
+     *
+     * @return Container's current capacity.
+     * @remark This method is only available if the internal container implementation
+     *         (e.g. <tt>lazy_sorted_container::container_impl</tt>) supports it.
+     */
     template<typename = std::enable_if_t<has_capacity_const_method<container_impl>::value, void>>
     auto capacity() const {
         return elements_.capacity();
     }
+
+    /**
+     * @brief Optimizes memory for size.
+     *
+     * Asks the container to shrink its internal memory to the minimum required
+     * to store its current elements. Depending on the internal container's
+     * implementation, this might or might not produce a result.
+     *
+     * @remark This method is only available if the internal container implementation
+     *         (e.g. <tt>lazy_sorted_container::container_impl</tt>) supports it.
+     */
     template<typename = std::enable_if_t<has_shrink_to_fit_method<container_impl>::value, void>>
     void shrink_to_fit() {
         elements_.shrink_to_fit();
     }
 
-    // Modifiers
-    // Note.1: because of lazy sorting, methods can't return iterators; they return void instead.
-    // Note.2: for containers that do not accept duplicates, inserted duplicates are silently stripped when sorted.
+    /**
+     * @brief Insert an element in the container.
+     *
+     * Inserts a new element in the container.
+     *
+     * @param value Element to insert.
+     * @remark In order to support lazy sorting, this method returns
+     *         @c void instead of a <tt>pair<iterator, bool></tt>.
+     */
     void insert(const value_type& value) {
         // What we do is push new value in the internal container, then check if container is still sorted.
         elements_.push_back(value);
@@ -1001,55 +1650,198 @@ public:
             update_sorted_after_push_back();
         }
     }
+
+    /**
+     * @brief Moves an element in the container.
+     *
+     * Inserts a new element in the container by moving it.
+     * If the element supports move semantics, no copy is performed.
+     *
+     * @param value Element to move in the container.
+     * @remark In order to support lazy sorting, this method returns
+     *         @c void instead of a <tt>pair<iterator, bool></tt>.
+     */
     void insert(value_type&& value) {
         elements_.push_back(std::move(value));
         if (sorted_) {
             update_sorted_after_push_back();
         }
     }
-    void insert(const_iterator, const value_type& value) {
+
+    /**
+     * @brief Inserts an element in the container with a hint iterator.
+     *
+     * Inserts a new element in the container.
+     *
+     * This method accepts a hint iterator, but discards it in order
+     * to support lazy sorting.
+     *
+     * @param hint Hint iterator; unused.
+     * @param value Element to insert.
+     * @remark In order to support lazy sorting, this method returns
+     *         @c void instead of an iterator.
+     */
+    void insert(const_iterator hint, const value_type& value) {
         // Ignore hint iterator in favor of lazy sorting
         insert(value);
     }
-    void insert(const_iterator, value_type&& value) {
+
+    /**
+     * @brief Moves an element in the container with a hint iterator.
+     *
+     * Inserts a new element in the container by moving it.
+     * If the element supports move semantics, no copy is performed.
+     *
+     * This method accepts a hint iterator, but discards it in order
+     * to support lazy sorting.
+     *
+     * @param hint Hint iterator; unused.
+     * @param value Element to move in the container.
+     * @remark In order to support lazy sorting, this method returns
+     *         @c void instead of an iterator.
+     */
+    void insert(const_iterator hint, value_type&& value) {
         insert(std::move(value));
     }
+
+    /**
+     * @brief Inserts a range of elements in the container.
+     *
+     * Inserts all elements in the range <tt>[first, last[</tt>
+     * in the container.
+     *
+     * @param first Beginning of range of elements to insert.
+     * @param last End of range of elements to insert.
+     */
     template<typename It> void insert(It first, It last) {
         // Checking if container is sorted would be onerous for batch inserts.
         elements_.insert(elements_.cend(), first, last);
         sorted_ = elements_.size() <= 1;
     }
+
+    /**
+     * @brief Inserts elements from an initializer list in the container.
+     *
+     * Inserts all elements in the given @c initializer_list in
+     * the container.
+     *
+     * @param init @c initializer_list containing the elements to insert.
+     */
     void insert(std::initializer_list<value_type> init) {
         elements_.insert(elements_.cend(), std::begin(init), std::end(init));
         sorted_ = elements_.size() <= 1;
     }
+
+    /**
+     * @brief Constructs a new element in the container.
+     *
+     * Constructs a new element in the container by forwarding the
+     * given arguments to <tt>lazy_sorted_container::value_type</tt>'s
+     * constructor.
+     *
+     * Note that for maps, @c value_type is a pair and thus must
+     * be constructed using one of <tt>std::pair</tt>'s constructors.
+     *
+     * @param args Arguments that will be forwarded to the element's constructor.
+     * @remark In order to support lazy sorting, this method returns
+     *         @c void instead of a <tt>pair<iterator, bool></tt>.
+     */
     template<typename... Args> void emplace(Args&&... args) {
         elements_.emplace_back(std::forward<Args>(args)...);
         if (sorted_) {
             update_sorted_after_push_back();
         }
     }
-    template<typename... Args> void emplace_hint(const_iterator, Args&&... args) {
+    
+    /**
+     * @brief Constructs a new element in the container with a hint iterator.
+     *
+     * Constructs a new element in the container by forwarding the
+     * given arguments to <tt>lazy_sorted_container::value_type</tt>'s
+     * constructor.
+     *
+     * This method accepts a hint iterator, but discards it in order
+     * to support lazy sorting.
+     *
+     * Note that for maps, @c value_type is a pair and thus must
+     * be constructed using one of <tt>std::pair</tt>'s constructors.
+     *
+     * @param args Arguments that will be forwarded to the element's constructor.
+     * @remark In order to support lazy sorting, this method returns
+     *         @c void instead of an @c iterator.
+     */
+    template<typename... Args> void emplace_hint(const_iterator hint, Args&&... args) {
         // Ignore hint iterator in favor of lazy sorting
         emplace(std::forward<Args>(args)...);
     }
+
+    /**
+     * @brief Removes an element from the container.
+     *
+     * Removes the element pointed to by the given iterator from the container.
+     *
+     * @param pos Iterator pointing at element to remove.
+     * @return Iterator pointing at element following the removed element or,
+     *         if the removed element was the last one, at the end of the container.
+     */
     iterator erase(const_iterator pos) {
         // If user has a valid iterator, it's because container is sorted.
         return elements_.erase(pos);
     }
+
+    /**
+     * @brief Removes many elements from the container.
+     *
+     * Removes all elements pointed to by iterators in the range
+     * <tt>[first, last[</tt> from the container.
+     *
+     * @param first Beginning of range of elements to remove.
+     * @param last End of range of elements to remove.
+     * @return Iterator pointing at element following the last element removed or,
+     *         if that was the last element, at the end of the container.
+     */
     iterator erase(const_iterator first, const_iterator last) {
         return elements_.erase(first, last);
     }
+    
+    /**
+     * @brief Removes elements by key.
+     *
+     * Removes all elements associated with the given key from the container.
+     *
+     * @param Key of element(s) to remove.
+     * @return Number of elements removed. For containers that do not accept
+     *         duplicates, this can never be greater than 1.
+     */
     size_type erase(const key_type& key) {
         auto range = equal_range(key);
         size_type dist = std::distance(range.first, range.second);
         erase(range.first, range.second);
         return dist;
     }
+
+    /**
+     * @brief Clears all elements.
+     *
+     * Removes all elements from the container.
+     */
     void clear() {
         elements_.clear();
         sorted_ = true;
     }
+
+    /**
+     * @brief Swaps the contents of two containers.
+     *
+     * Swaps the content of this container with another. After this method
+     * returns, this container will contain the elements formely in @c obj
+     * and vice-versa.
+     *
+     * Depending on internal container implementation, this is usually done
+     * without moving of copying elements; only pointers are swapped.
+     *
+     * @param obj Container to swap with.
+     */
     void swap(lazy_sorted_container& obj) {
         using std::swap;
         swap(elements_, obj.elements_);
@@ -1058,30 +1850,123 @@ public:
         swap(vcmp_, obj.vcmp_);
         swap(veq_, obj.veq_);
     }
-    // Non-member swap that can be found via ADL
+
+    /**
+     * @brief Swaps the contents of two containers (ADL version).
+     *
+     * Swaps the content of two containers. After this function returns,
+     * @c obj1 will contain the elements formely in @c obj2 and vice-versa.
+     *
+     * Depending on internal container implementation, this is usually done
+     * without moving of copying elements; only pointers are swapped.
+     *
+     * This function is similar to the @c swap method, but can be found
+     * through ADL:
+     *
+     * @code
+     *   swap(c1, c2); // No need for coveo::lazy::...
+     * @endcode
+     *
+     * @param obj1 First container to swap.
+     * @param obj2 Second container to swap.
+     */
     friend void swap(lazy_sorted_container& obj1, lazy_sorted_container& obj2) {
         obj1.swap(obj2);
     }
 
-    // Modifiers that are only available for non-multi maps
+    /**
+     * @brief Inserts or assigns a value.
+     *
+     * If the container contains an element associated with @c key, assigns
+     * @c val (by forwarding it) to its associated value. Otherwise, inserts
+     * a new element constructed by copying @c key and forwarding @c val.
+     *
+     * @param key Key of element to insert or assign to.
+     * @param val Value to insert or assign to @c key.
+     * @return @c pair whose @c first element is an @c iterator pointing at
+     *         the element in the container and whose @c second element will
+     *         be @c true if element was inserted or @c false if it was
+     *         assigned to.
+     * @remark This method is only available for non-multi maps.
+     */
     template<typename OT,
              bool _Enabled = _IsNonMultiMap,
              typename = std::enable_if_t<_Enabled, void>>
     std::pair<iterator, bool> insert_or_assign(const key_type& key, OT&& val) {
         return insert_or_assign_impl(key, std::forward<OT>(val));
     }
+
+    /**
+     * @brief Inserts or assigns a value (move key version).
+     *
+     * If the container contains an element associated with @c key, assigns
+     * @c val (by forwarding it) to its associated value. Otherwise, inserts
+     * a new element constructed by moving @c key and forwarding @c val.
+     *
+     * @param key Key of element to move-insert or assign to.
+     * @param val Value to insert or assign to @c key.
+     * @return @c pair whose @c first element is an @c iterator pointing at
+     *         the element in the container and whose @c second element will
+     *         be @c true if element was inserted or @c false if it was
+     *         assigned to.
+     * @remark This method is only available for non-multi maps.
+     */
     template<typename OT,
              bool _Enabled = _IsNonMultiMap,
              typename = std::enable_if_t<_Enabled, void>>
     std::pair<iterator, bool> insert_or_assign(key_type&& key, OT&& val) {
         return insert_or_assign_impl(std::move(key), std::forward<OT>(val));
     }
+
+    /**
+     * @brief Tries to construct an element in the container.
+     *
+     * If the container already contains an element associated with @c key,
+     * does nothing; otherwise, constructs a new element in the container
+     * by copying @c key and forwarding @c args to the value's constructor,
+     * as if calling
+     *
+     * @code
+     *   value_type(std::piecewise_construct,
+     *              std::forward_as_tuple(key),
+     *              std::forward_as_tuple(std::forward<Args>(args)...))
+     * @endcode
+     *
+     * @param key Key of element to try adding.
+     * @param args Arguments to forward to the value's constructor.
+     * @return @c pair whose @c first element is an @c iterator pointing at
+     *         the element in the container and whose @c second element will
+     *         be @c true if element was added or @c false if it already existed.
+     * @remark This method is only available for non-multi maps.
+     */
     template<typename... Args,
              bool _Enabled = _IsNonMultiMap,
              typename = std::enable_if_t<_Enabled, void>>
     std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args) {
         return try_emplace_impl(key, std::forward<Args>(args)...);
     }
+
+    /**
+     * @brief Tries to construct an element in the container (move key version).
+     *
+     * If the container already contains an element associated with @c key,
+     * does nothing; otherwise, constructs a new element in the container
+     * by moving @c key and forwarding @c args to the value's constructor,
+     * as if calling
+     *
+     * @code
+     *   value_type(std::piecewise_construct,
+     *              std::forward_as_tuple(std::move(key)),
+     *              std::forward_as_tuple(std::forward<Args>(args)...))
+     * @endcode
+     *
+     * @param key Key of element to try adding (by moving it).
+     * @param args Arguments to forward to the value's constructor.
+     * @return @c pair whose @c first element is an @c iterator pointing at
+     *         the element in the container and whose @c second element will
+     *         be @c true if element was added or @c false if it already existed.
+     * @remark This method is only available for non-multi maps.
+     */
     template<typename... Args,
              bool _Enabled = _IsNonMultiMap,
              typename = std::enable_if_t<_Enabled, void>>
