@@ -1974,51 +1974,187 @@ public:
         return try_emplace_impl(std::move(key), std::forward<Args>(args)...);
     }
 
-    // Lookups
+    /**
+     * @brief Returns number of elements associated to a key.
+     *
+     * Returns the number of elements in the container that are associated
+     * with @c key. For containers that do not accept duplicates, this
+     * will be at most 1.
+     *
+     * @param key Key of element(s) to count.
+     * @return Number of elements associated with @c key.
+     */
     size_type count(const key_type& key) const {
         auto range = equal_range(key);
         return std::distance(range.first, range.second);
     }
+
+    /**
+     * @brief Looks for an element in the container.
+     *
+     * Looks for an element in the container associated with @c key.
+     * If at least one is found, returns an <tt>lazy_sorted_container::iterator</tt>
+     * pointing at the first such element, otherwise pointing at
+     * <tt>lazy_sorted_container::end()</tt>.
+     *
+     * @param key Key of element to look for.
+     * @return @c iterator pointing at element if found, otherwise
+     *         pointing at the @c end of the container.
+     */
     iterator find(const key_type& key) {
         sort_if_needed();
         auto elem_end = elements_.end();
         auto it = std::lower_bound(elements_.begin(), elem_end, key, vcmp_);
         return (it != elem_end && !vcmp_(key, *it)) ? it : elem_end;
     }
+
+    /**
+     * @brief Looks for an element in the container (const version).
+     *
+     * Looks for an element in the container associated with @c key.
+     * If at least one is found, returns a <tt>lazy_sorted_container::const_iterator</tt>
+     * pointing at the first such element, otherwise pointing at
+     * <tt>lazy_sorted_container::cend()</tt>.
+     *
+     * @param key Key of element to look for.
+     * @return @c const_iterator pointing at element if found, otherwise
+     *         pointing at the @c end of the container.
+     */
     const_iterator find(const key_type& key) const {
         sort_if_needed();
         auto elem_cend = elements_.cend();
         auto cit = std::lower_bound(elements_.cbegin(), elem_cend, key, vcmp_);
         return (cit != elem_cend && !vcmp_(key, *cit)) ? cit : elem_cend;
     }
+
+    /**
+     * @brief Looks for key's lower bound.
+     *
+     * Looks for the first element in the container whose key is greater than
+     * or equal to @c key. This corresponds to the key's "lower bound".
+     *
+     * @param key Key to look for.
+     * @return @c iterator pointing at first element whose key is greater than
+     *         or equal to @c key. If no element is associated with @c key in
+     *         the container, returns the first element associated with the
+     *         next key or possibly <tt>lazy_sorted_container::end()</tt>.
+     * @see lazy_sorted_container::upper_bound
+     * @see lazy_sorted_container::equal_range
+     */
     iterator lower_bound(const key_type& key) {
         sort_if_needed();
         return std::lower_bound(elements_.begin(), elements_.end(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's lower bound (const version).
+     *
+     * Looks for the first element in the container whose key is greater than
+     * or equal to @c key. This corresponds to the key's "lower bound".
+     * (@c const version)
+     *
+     * @param key Key to look for.
+     * @return @c const_iterator pointing at first element whose key is greater than
+     *         or equal to @c key. If no element is associated with @c key in
+     *         the container, returns the first element associated with the
+     *         next key or possibly <tt>lazy_sorted_container::end()</tt>.
+     * @see lazy_sorted_container::upper_bound
+     * @see lazy_sorted_container::equal_range
+     */
     const_iterator lower_bound(const key_type& key) const {
         sort_if_needed();
         return std::lower_bound(elements_.cbegin(), elements_.cend(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's upper bound.
+     *
+     * Looks for the first element in the container whose key is greater than @c key.
+     * This corresponds to the key's "upper bound".
+     *
+     * @param key Key to look for.
+     * @return @c iterator pointing at first element whose key is greater than @c key,
+     *         possibly <tt>lazy_sorted_container::end()</tt>.
+     * @see lazy_sorted_container::lower_bound
+     * @see lazy_sorted_container::equal_range
+     */
     iterator upper_bound(const key_type& key) {
         sort_if_needed();
         return std::upper_bound(elements_.begin(), elements_.end(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's upper bound (const version).
+     *
+     * Looks for the first element in the container whose key is greater than @c key.
+     * This corresponds to the key's "upper bound". (@c const version)
+     *
+     * @param key Key to look for.
+     * @return @c const_iterator pointing at first element whose key is greater than @c key,
+     *         possibly <tt>lazy_sorted_container::end()</tt>.
+     * @see lazy_sorted_container::lower_bound
+     * @see lazy_sorted_container::equal_range
+     */
     const_iterator upper_bound(const key_type& key) const {
         sort_if_needed();
         return std::upper_bound(elements_.cbegin(), elements_.cend(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's lower and upper bounds.
+     *
+     * Looks for a key's lower and upper bounds. This is similar to
+     * calling <tt>lazy_sorted_container::lower_bound()</tt> and
+     * <tt>lazy_sorted_container::upper_bound()</tt>.
+     *
+     * @param key Key to look for.
+     * @return @c pair of <tt>iterator</tt>s, whose @c first points to the first
+     *         element in the container whose key is greater than or equal
+     *         to @c key and whose @c second points to the first element
+     *         whose key is greater than @c key.
+     * @see lazy_sorted_container::lower_bound
+     * @see lazy_sorted_container::upper_bound
+     */
     std::pair<iterator, iterator> equal_range(const key_type& key) {
         sort_if_needed();
         return std::equal_range(elements_.begin(), elements_.end(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's lower and upper bounds (const version).
+     *
+     * Looks for a key's lower and upper bounds. This is similar to
+     * calling <tt>lazy_sorted_container::lower_bound()</tt> and
+     * <tt>lazy_sorted_container::upper_bound()</tt>. (@c const version)
+     *
+     * @param key Key to look for.
+     * @return @c pair of <tt>const_iterator</tt>s, whose @c first points to the
+     *         first element in the container whose key is greater than or equal
+     *         to @c key and whose @c second points to the first element
+     *         whose key is greater than @c key.
+     * @see lazy_sorted_container::lower_bound
+     * @see lazy_sorted_container::upper_bound
+     */
     std::pair<const_iterator, const_iterator> equal_range(const key_type& key) const {
         sort_if_needed();
         return std::equal_range(elements_.cbegin(), elements_.cend(), key, vcmp_);
     }
 
-    // Lookups with any type supported by key comparator
-    // Only available if key comparator is a transparent function
-    // (e.g. defines is_transparent), like std::less<>.
+    /**
+     * @brief Returns number of elements associated to a key using any type of key.
+     *
+     * Returns the number of elements in the container that are associated
+     * with @c key, which can be any type accepted by
+     * <tt>lazy_sorted_container::key_compare</tt>. For containers that
+     * do not accept duplicates, this will be at most 1.
+     *
+     * @param key Key of element(s) to count.
+     * @return Number of elements associated with @c key.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
