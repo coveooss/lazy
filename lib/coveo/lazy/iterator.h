@@ -27,11 +27,18 @@ namespace lazy {
  * @see coveo::lazy::inserter()
  */
 template<typename Container>
-class insert_iterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
+class insert_iterator
 {
 public:
+    // Standard iterator typedefs
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using difference_type = void;
+    using pointer = void;
+    using reference = void;
+
     // Type of container we insert into
-    typedef Container container_type;
+    using container_type = Container;
 
     // Constructor
     explicit insert_iterator(container_type& c)
@@ -63,6 +70,9 @@ protected:
 /**
  * @brief Helper function to create <tt>coveo::lazy::insert_iterator</tt> instances.
  * @headerfile iterator.h <coveo/lazy/iterator.h>
+ *
+ * Creates an <tt>coveo::lazy::insert_iterator</tt> instance that
+ * will perform blind insertions in container @c c.
  *
  * @see coveo::lazy::insert_iterator
  */

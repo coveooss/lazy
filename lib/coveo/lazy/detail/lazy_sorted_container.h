@@ -27,6 +27,36 @@
  * These containers are designed to be used in situations where insertions
  * in the container are usually performed in batches, followed by queries.
  * They are simpler to use than manually sorting <tt>std::vector</tt>s.
+ *
+ * Here is an example that uses <tt>coveo::lazy::set</tt>:
+ *
+ * @code
+ *   // Declare our set
+ *   coveo::lazy::set<std::string> our_set;
+ *
+ *   // Populate it in batch. This is more efficient than std::set.
+ *   for (const auto& s : some_sequence) {
+ *       our_set.insert(s);
+ *   }
+ *
+ *   // Now we're ready to perform queries. The first one
+ *   // will trigger a sorting of the set's elements.
+ *   for (;;) {
+ *       std::cout << "Enter a string: ";
+ *       std::string s;
+ *       std::getline(std::cin, s);
+ *       if (s.empty()) {
+ *           break;
+ *       } else if (our_set.find(s) != our_set.end()) {
+ *           std::cout << "String was found!" << std::endl;
+ *       } else {
+ *           std::cout << "Not found." << std::endl;
+ *       }
+ *   }
+ * @endcode
+ *
+ * @copyright 2015-2016, Coveo Solutions Inc.
+ *            Distributed under the Apache License, Version 2.0 (see <a href="https://github.com/coveo/lazy/blob/master/LICENSE">LICENSE</a>).
  */
 
 #ifndef COVEO_LAZY_DETAIL_LAZY_SORTED_CONTAINER_H
@@ -658,7 +688,7 @@ template<typename T> struct mapped_type_base {
     /**
      * @brief Type of values stored in the map. Absent for set-like containers.
      */
-    typedef T mapped_type;
+    using mapped_type = T;
 };
 template<> struct mapped_type_base<void> { };
 
@@ -689,7 +719,7 @@ template<> struct mapped_type_base<void> { };
  * additional methods are included:
  *
  * - <tt>at()</tt>
- * - <tt>operator[]</tt>
+ * - <tt>operator[]()</tt>
  * - <tt>insert_or_assign()</tt>
  * - <tt>try_emplace()</tt>
  *
@@ -1148,10 +1178,6 @@ public:
         return *this;
     }
 
-    // Equality operators. Validates that both containers have the same elements.
-    // Note: does not use key_equal_to to compare elements; elements must be EqualityComparable for this to work.
-    // For more information, see http://en.cppreference.com/w/cpp/concept/EqualityComparable
-
     /**
      * @brief Equality operator.
      *
@@ -1174,8 +1200,8 @@ public:
     /**
      * @brief Inequality operator.
      *
-     * Operator that verifies if two containers have different elements. For more info, see
-     * <tt>lazy_sorted_container::operator==</tt>.
+     * Operator that verifies if two containers have different elements.
+     * For more info, see <tt>operator==()</tt>.
      *
      * @param left First container to compare.
      * @param right Second container to compare.
@@ -1209,7 +1235,7 @@ public:
      * @brief "Less than or equal to" comparison operator.
      *
      * Operator that verifies if a container is "less than or equal to" another.
-     * For more information, see <tt>lazy_sorted_container::operator< </tt>.
+     * For more information, see <tt>operator<()</tt>.
      *
      * @param left First container to compare.
      * @param right Second container to compare.
@@ -1223,7 +1249,7 @@ public:
      * @brief "Greater than" comparison operator.
      *
      * Operator that verifies if a container is "greater than" another.
-     * For more information, see <tt>lazy_sorted_container::operator< </tt>.
+     * For more information, see <tt>operator<()</tt>.
      *
      * @param left First container to compare.
      * @param right Second container to compare.
@@ -1237,7 +1263,7 @@ public:
      * @brief "Greater than or equal to" comparison operator.
      *
      * Operator that verifies if a container is "greater than or equal to" another.
-     * For more information, see <tt>lazy_sorted_container::operator< </tt>.
+     * For more information, see <tt>operator<()</tt>.
      *
      * @param left First container to compare.
      * @param right Second container to compare.
@@ -1334,7 +1360,7 @@ public:
      * @brief Iterator to beginning of container.
      *
      * Returns an <tt>lazy_sorted_container::iterator</tt> that points to the
-     * beginning of this container. Together with <tt>lazy_sorted_container::end()</tt>,
+     * beginning of this container. Together with <tt>end()</tt>,
      * it can be used to enumerate the container's elements.
      *
      * The iterator allows elements to be modified if this container is a map.
@@ -1354,7 +1380,7 @@ public:
      * @brief Iterator to beginning of container (const version).
      *
      * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
-     * the beginning of this container. Together with <tt>lazy_sorted_container::end()</tt>,
+     * the beginning of this container. Together with <tt>end()</tt>,
      * it can be used to enumerate the container's elements.
      *
      * The iterator does not allow elements to be modified.
@@ -1370,7 +1396,7 @@ public:
      * @brief Iterator to beginning of container (const version).
      *
      * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
-     * the beginning of this container. Together with <tt>lazy_sorted_container::cend()</tt>,
+     * the beginning of this container. Together with <tt>cend()</tt>,
      * it can be used to enumerate the container's elements.
      *
      * The iterator does not allow elements to be modified.
@@ -1389,7 +1415,7 @@ public:
      * @brief Iterator to end of container.
      *
      * Returns an <tt>lazy_sorted_container::iterator</tt> that points to
-     * the end of this container. Together with <tt>lazy_sorted_container::begin()</tt>,
+     * the end of this container. Together with <tt>begin()</tt>,
      * it can be used to enumerate the container's elements.
      *
      * The iterator allows elements to be modified if this container is a map.
@@ -1406,7 +1432,7 @@ public:
      * @brief Iterator to end of container (const version).
      *
      * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
-     * the end of this container. Together with <tt>lazy_sorted_container::begin()</tt>,
+     * the end of this container. Together with <tt>begin()</tt>,
      * it can be used to enumerate the container's elements.
      *
      * The iterator does not allow elements to be modified.
@@ -1422,7 +1448,7 @@ public:
      * @brief Iterator to end of container (const version).
      *
      * Returns a <tt>lazy_sorted_container::const_iterator</tt> that points to
-     * the end of this container. Together with <tt>lazy_sorted_container::cbegin()</tt>,
+     * the end of this container. Together with <tt>cbegin()</tt>,
      * it can be used to enumerate the container's elements.
      *
      * The iterator does not allow elements to be modified.
@@ -1441,9 +1467,8 @@ public:
      * @brief Iterator to beginning of container (in reverse).
      *
      * Returns a <tt>lazy_sorted_container::reverse_iterator</tt> that points to the
-     * beginning of a reverse view of this container. Together with
-     * <tt>lazy_sorted_container::rend()</tt>, it can be used to enumerate
-     * the container's elements, but in reverse.
+     * beginning of a reverse view of this container. Together with <tt>rend()</tt>,
+     * it can be used to enumerate the container's elements, but in reverse.
      *
      * The iterator allows elements to be modified if this container is a map.
      *
@@ -1460,8 +1485,8 @@ public:
      *
      * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
      * points to the beginning of a reverse view of this container. Together with
-     * <tt>lazy_sorted_container::rend()</tt>, it can be used to enumerate
-     * the container's elements, but in reverse.
+     * <tt>rend()</tt>, it can be used to enumerate the container's elements,
+     * but in reverse.
      *
      * The iterator does not allow elements to be modified.
      *
@@ -1477,8 +1502,8 @@ public:
      *
      * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
      * points to the beginning of a reverse view of this container. Together with
-     * <tt>lazy_sorted_container::crend()</tt>, it can be used to enumerate
-     * the container's elements, but in reverse.
+     * <tt>crend()</tt>, it can be used to enumerate the container's elements,
+     * but in reverse.
      *
      * The iterator does not allow elements to be modified.
      *
@@ -1497,8 +1522,8 @@ public:
      *
      * Returns a <tt>lazy_sorted_container::reverse_iterator</tt> that points to
      * the end of a reverse view of this container. Together with
-     * <tt>lazy_sorted_container::rbegin()</tt>, it can be used to enumerate
-     * the container's elements, but in reverse.
+     * <tt>rbegin()</tt>, it can be used to enumerate the container's
+     * elements, but in reverse.
      *
      * The iterator allows elements to be modified if this container is a map.
      *
@@ -1515,8 +1540,8 @@ public:
      *
      * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
      * points to the end of a reverse view of this container. Together with
-     * <tt>lazy_sorted_container::rbegin()</tt>, it can be used to enumerate
-     * the container's elements, but in reverse.
+     * <tt>rbegin()</tt>, it can be used to enumerate the container's elements,
+     * but in reverse.
      *
      * The iterator does not allow elements to be modified.
      *
@@ -1532,8 +1557,8 @@ public:
      *
      * Returns a <tt>lazy_sorted_container::const_reverse_iterator</tt> that
      * points to the end of a reverse view of this container. Together with
-     * <tt>lazy_sorted_container::crbegin()</tt>, it can be used to enumerate
-     * the container's elements, but in reverse.
+     * <tt>crbegin()</tt>, it can be used to enumerate the container's elements,
+     * but in reverse.
      *
      * The iterator does not allow elements to be modified.
      *
@@ -1608,7 +1633,7 @@ public:
      *
      * Returns the container's capacity, e.g. how many elements it can contain
      * before having to reallocate memory somehow. This value will be greater
-     * than or equal to that returned by <tt>lazy_sorted_container::size()</tt>.
+     * than or equal to that returned by <tt>size()</tt>.
      *
      * @return Container's current capacity.
      * @remark This method is only available if the internal container implementation
@@ -1994,8 +2019,7 @@ public:
      *
      * Looks for an element in the container associated with @c key.
      * If at least one is found, returns an <tt>lazy_sorted_container::iterator</tt>
-     * pointing at the first such element, otherwise pointing at
-     * <tt>lazy_sorted_container::end()</tt>.
+     * pointing at the first such element, otherwise pointing at <tt>end()</tt>.
      *
      * @param key Key of element to look for.
      * @return @c iterator pointing at element if found, otherwise
@@ -2013,8 +2037,7 @@ public:
      *
      * Looks for an element in the container associated with @c key.
      * If at least one is found, returns a <tt>lazy_sorted_container::const_iterator</tt>
-     * pointing at the first such element, otherwise pointing at
-     * <tt>lazy_sorted_container::cend()</tt>.
+     * pointing at the first such element, otherwise pointing at <tt>cend()</tt>.
      *
      * @param key Key of element to look for.
      * @return @c const_iterator pointing at element if found, otherwise
@@ -2037,7 +2060,7 @@ public:
      * @return @c iterator pointing at first element whose key is greater than
      *         or equal to @c key. If no element is associated with @c key in
      *         the container, returns the first element associated with the
-     *         next key or possibly <tt>lazy_sorted_container::end()</tt>.
+     *         next key or possibly <tt>end()</tt>.
      * @see lazy_sorted_container::upper_bound
      * @see lazy_sorted_container::equal_range
      */
@@ -2057,7 +2080,7 @@ public:
      * @return @c const_iterator pointing at first element whose key is greater than
      *         or equal to @c key. If no element is associated with @c key in
      *         the container, returns the first element associated with the
-     *         next key or possibly <tt>lazy_sorted_container::end()</tt>.
+     *         next key or possibly <tt>cend()</tt>.
      * @see lazy_sorted_container::upper_bound
      * @see lazy_sorted_container::equal_range
      */
@@ -2074,7 +2097,7 @@ public:
      *
      * @param key Key to look for.
      * @return @c iterator pointing at first element whose key is greater than @c key,
-     *         possibly <tt>lazy_sorted_container::end()</tt>.
+     *         possibly <tt>end()</tt>.
      * @see lazy_sorted_container::lower_bound
      * @see lazy_sorted_container::equal_range
      */
@@ -2091,7 +2114,7 @@ public:
      *
      * @param key Key to look for.
      * @return @c const_iterator pointing at first element whose key is greater than @c key,
-     *         possibly <tt>lazy_sorted_container::end()</tt>.
+     *         possibly <tt>cend()</tt>.
      * @see lazy_sorted_container::lower_bound
      * @see lazy_sorted_container::equal_range
      */
@@ -2104,8 +2127,7 @@ public:
      * @brief Looks for key's lower and upper bounds.
      *
      * Looks for a key's lower and upper bounds. This is similar to
-     * calling <tt>lazy_sorted_container::lower_bound()</tt> and
-     * <tt>lazy_sorted_container::upper_bound()</tt>.
+     * calling <tt>lower_bound()</tt> and <tt>upper_bound()</tt>.
      *
      * @param key Key to look for.
      * @return @c pair of <tt>iterator</tt>s, whose @c first points to the first
@@ -2124,8 +2146,8 @@ public:
      * @brief Looks for key's lower and upper bounds (const version).
      *
      * Looks for a key's lower and upper bounds. This is similar to
-     * calling <tt>lazy_sorted_container::lower_bound()</tt> and
-     * <tt>lazy_sorted_container::upper_bound()</tt>. (@c const version)
+     * calling <tt>lower_bound()</tt> and <tt>upper_bound()</tt>.
+     * (@c const version)
      *
      * @param key Key to look for.
      * @return @c pair of <tt>const_iterator</tt>s, whose @c first points to the
@@ -2162,6 +2184,23 @@ public:
         auto range = equal_range(key);
         return std::distance(range.first, range.second);
     }
+
+    /**
+     * @brief Looks for an element in the container using any type of key.
+     *
+     * Looks for an element in the container associated with @c key, which
+     * can be any type accepted by <tt>lazy_sorted_container::key_compare</tt>.
+     * If at least one is found, returns an <tt>lazy_sorted_container::iterator</tt>
+     * pointing at the first such element, otherwise pointing at <tt>end()</tt>.
+     *
+     * @param key Key of element to look for.
+     * @return @c iterator pointing at element if found, otherwise
+     *         pointing at the @c end of the container.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2171,6 +2210,23 @@ public:
         auto it = std::lower_bound(elements_.begin(), elem_end, key, vcmp_);
         return (it != elem_end && !vcmp_(key, *it)) ? it : elem_end;
     }
+
+    /**
+     * @brief Looks for an element in the container using any type of key (const version).
+     *
+     * Looks for an element in the container associated with @c key, which
+     * can be any type accepted by <tt>lazy_sorted_container::key_compare</tt>.
+     * If at least one is found, returns a <tt>lazy_sorted_container::const_iterator</tt>
+     * pointing at the first such element, otherwise pointing at <tt>cend()</tt>.
+     *
+     * @param key Key of element to look for.
+     * @return @c const_iterator pointing at element if found, otherwise
+     *         pointing at the @c end of the container.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2180,6 +2236,27 @@ public:
         auto cit = std::lower_bound(elements_.cbegin(), elem_cend, key, vcmp_);
         return (cit != elem_cend && !vcmp_(key, *cit)) ? cit : elem_cend;
     }
+
+    /**
+     * @brief Looks for key's lower bound using any type of key.
+     *
+     * Looks for the first element in the container whose key is greater
+     * than or equal to @c key, which can be any type accepted by
+     * <tt>lazy_sorted_container::key_compare</tt>. This corresponds
+     * to the key's "lower bound".
+     *
+     * @param key Key to look for.
+     * @return @c iterator pointing at first element whose key is greater than
+     *         or equal to @c key. If no element is associated with @c key in
+     *         the container, returns the first element associated with the
+     *         next key or possibly <tt>end()</tt>.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     * @see lazy_sorted_container::upper_bound(const OK&)
+     * @see lazy_sorted_container::equal_range(const OK&)
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2187,6 +2264,27 @@ public:
         sort_if_needed();
         return std::lower_bound(elements_.begin(), elements_.end(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's lower bound using any type of key (const version).
+     *
+     * Looks for the first element in the container whose key is greater
+     * than or equal to @c key, which can be any type accepted by
+     * <tt>lazy_sorted_container::key_compare</tt>. This corresponds
+     * to the key's "lower bound". (@c const version)
+     *
+     * @param key Key to look for.
+     * @return @c const_iterator pointing at first element whose key is greater than
+     *         or equal to @c key. If no element is associated with @c key in
+     *         the container, returns the first element associated with the
+     *         next key or possibly <tt>cend()</tt>.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     * @see lazy_sorted_container::upper_bound(const OK&)
+     * @see lazy_sorted_container::equal_range(const OK&)
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2194,6 +2292,24 @@ public:
         sort_if_needed();
         return std::lower_bound(elements_.cbegin(), elements_.cend(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's upper bound using any type of key.
+     *
+     * Looks for the first element in the container whose key is greater than @c key,
+     * which can be any type accepted by <tt>lazy_sorted_container::key_compare</tt>.
+     * This corresponds to the key's "upper bound".
+     *
+     * @param key Key to look for.
+     * @return @c iterator pointing at first element whose key is greater than @c key,
+     *         possibly <tt>end()</tt>.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     * @see lazy_sorted_container::lower_bound(const OK&)
+     * @see lazy_sorted_container::equal_range(const OK&)
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2201,6 +2317,24 @@ public:
         sort_if_needed();
         return std::upper_bound(elements_.begin(), elements_.end(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's upper bound using any type of key (const version).
+     *
+     * Looks for the first element in the container whose key is greater than @c key,
+     * which can be any type accepted by <tt>lazy_sorted_container::key_compare</tt>.
+     * This corresponds to the key's "upper bound". (@c const version)
+     *
+     * @param key Key to look for.
+     * @return @c const_iterator pointing at first element whose key is greater than @c key,
+     *         possibly <tt>cend()</tt>.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     * @see lazy_sorted_container::lower_bound(const OK&)
+     * @see lazy_sorted_container::equal_range(const OK&)
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2208,6 +2342,26 @@ public:
         sort_if_needed();
         return std::upper_bound(elements_.cbegin(), elements_.cend(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's lower and upper bounds using any type of key.
+     *
+     * Looks for a key's lower and upper bounds using any type accepted
+     * by <tt>lazy_sorted_container::key_compare</tt>. This is similar to
+     * calling <tt>lower_bound()</tt> and <tt>upper_bound()</tt>.
+     *
+     * @param key Key to look for.
+     * @return @c pair of <tt>iterator</tt>s, whose @c first points to the first
+     *         element in the container whose key is greater than or equal
+     *         to @c key and whose @c second points to the first element
+     *         whose key is greater than @c key.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     * @see lazy_sorted_container::lower_bound(const OK&)
+     * @see lazy_sorted_container::upper_bound(const OK&)
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2215,6 +2369,26 @@ public:
         sort_if_needed();
         return std::equal_range(elements_.begin(), elements_.end(), key, vcmp_);
     }
+
+    /**
+     * @brief Looks for key's lower and upper bounds using any type of key (const version).
+     *
+     * Looks for a key's lower and upper bounds using any type accepted
+     * by <tt>lazy_sorted_container::key_compare</tt>. This is similar to
+     * calling <tt>lower_bound()</tt> and <tt>upper_bound()</tt>.
+     *
+     * @param key Key to look for.
+     * @return @c pair of <tt>const_iterator</tt>s, whose @c first points to the first
+     *         element in the container whose key is greater than or equal
+     *         to @c key and whose @c second points to the first element
+     *         whose key is greater than @c key.
+     * @remark This method is only available if <tt>lazy_sorted_container::key_compare</tt>
+     *         is a transparent function (e.g. defines @c is_transparent), like
+     *         <tt>std::less<></tt>. For more info, see
+     *         http://en.cppreference.com/w/cpp/utility/functional/less_void
+     * @see lazy_sorted_container::lower_bound(const OK&)
+     * @see lazy_sorted_container::upper_bound(const OK&)
+     */
     template<typename OK,
              typename _OKCmp = key_compare,
              typename = typename _OKCmp::is_transparent>
@@ -2223,27 +2397,91 @@ public:
         return std::equal_range(elements_.cbegin(), elements_.cend(), key, vcmp_);
     }
 
-    // Predicates / allocator
+    /**
+     * @brief Returns key comparator.
+     *
+     * Returns the instance of <tt>lazy_sorted_container::key_compare</tt>
+     * used by the container to compare keys.
+     *
+     * @return Key comparator instance.
+     */
     key_compare key_comp() const {
         return vcmp_.key_predicate();
     }
+
+    /**
+     * @brief Returns value comparator.
+     *
+     * Returns the instance of <tt>lazy_sorted_container::value_compare</tt>
+     * used by the container to compare elements, or "values".
+     *
+     * @return Value comparator instance.
+     */
     value_compare value_comp() const {
         return vcmp_;
     }
+
+    /**
+     * @brief Returns allocator.
+     *
+     * Returns the instance of <tt>lazy_sorted_container::allocator_type</tt>
+     * used by the container to allocate memory.
+     *
+     * @return Allocator instance.
+     */
     allocator_type get_allocator() const {
         return elements_.get_allocator();
     }
+
+    /**
+     * @brief Returns key equality predicate.
+     *
+     * Returns the instance of <tt>lazy_sorted_container::key_equal_to</tt>
+     * used by the container to determine if two keys are equal.
+     *
+     * @return Key equality predicate instance.
+     */
     key_equal_to key_eq() const {
         return veq_.key_predicate();
     }
+
+    /**
+     * @brief Returns value equality predicate.
+     *
+     * Returns the instance of <tt>lazy_sorted_container::value_equal_to</tt>
+     * used by the container to determine if two elements, or "values",
+     * are equal.
+     *
+     * @return Value equality predicate instance.
+     */
     value_equal_to value_eq() const {
         return veq_;
     }
 
-    // Sorting
+    /**
+     * @brief Checks if container is sorted.
+     *
+     * Determines if the elements in the container are currently sorted.
+     * Elements could be unsorted following insertions, if no query
+     * was performed.
+     *
+     * It's possible to trigger sorting by calling <tt>sort()</tt>.
+     *
+     * @return @c true if elements are currently sorted.
+     * @see lazy_sorted_container::sort
+     */
     bool sorted() const {
         return sorted_;
     }
+
+    /**
+     * @brief Forces container to sort elements.
+     *
+     * Forces container to sort its elements immediately. Has no effect
+     * if elements are already sorted.
+     *
+     * @see lazy_sorted_container::sorted
+     */
     void sort() {
         sort_if_needed();
     }
