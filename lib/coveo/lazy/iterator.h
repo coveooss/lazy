@@ -30,33 +30,136 @@ template<typename Container>
 class insert_iterator
 {
 public:
-    // Standard iterator typedefs
+    /**
+     * @brief Iterator category.
+     *
+     * Typedef representing the type of iterator. In our case, this is
+     * defined as <tt>std::output_iterator_tag</tt> to indicate this is
+     * an output iterator.
+     *
+     * Part of the five standard iterator typedefs that guarantee that
+     * <tt>std::iterator_traits</tt> work for our type.
+     */
     using iterator_category = std::output_iterator_tag;
+
+    /**
+     * @brief Type of value returned by iterator.
+     *
+     * Typedef representing the type of value returned by the iterator.
+     * In our case, since this is an output iterator, it is defined as @c void.
+     *
+     * Part of the five standard iterator typedefs that guarantee that
+     * <tt>std::iterator_traits</tt> work for our type.
+     */
     using value_type = void;
+
+    /**
+     * @brief Difference between iterators.
+     *
+     * Typedef representing the difference between two iterators.
+     * In our case, since this is an output iterator, it is defined as @c void.
+     *
+     * Part of the five standard iterator typedefs that guarantee that
+     * <tt>std::iterator_traits</tt> work for our type.
+     */
     using difference_type = void;
+
+    /**
+     * @brief Value pointer.
+     *
+     * Typedef representing the pointer to <tt>insert_iterator::value_type</tt>.
+     * In our case, since this is an output iterator, it is defined as @c void.
+     *
+     * Part of the five standard iterator typedefs that guarantee that
+     * <tt>std::iterator_traits</tt> work for our type.
+     */
     using pointer = void;
+
+    /**
+     * @brief Value reference.
+     *
+     * Typedef representing the reference to <tt>insert_iterator::value_type</tt>.
+     * In our case, since this is an output iterator, it is defined as @c void.
+     *
+     * Part of the five standard iterator typedefs that guarantee that
+     * <tt>std::iterator_traits</tt> work for our type.
+     */
     using reference = void;
 
-    // Type of container we insert into
+    /**
+     * @brief Type of container we insert into.
+     *
+     * Type of container that this iterator inserts into.
+     */
     using container_type = Container;
 
-    // Constructor
+    /**
+     * @brief Constructor.
+     *
+     * Constructor. Creates an output iterator that will perform
+     * blind insertions in container @c c.
+     *
+     * @param c Container to insert into.
+     */
     explicit insert_iterator(container_type& c)
         : pc_(std::addressof(c)) { }
 
-    // Assignment operators that copy/move values in the container
+    /**
+     * @brief Inserts element in the container.
+     *
+     * Inserts an element (by copying it) in the container that
+     * was passed to the constructor. Always performs a blind insertion.
+     *
+     * @param value Element to insert.
+     * @return Reference to @c this output iterator.
+     */
     insert_iterator& operator=(const typename container_type::value_type& value) {
         pc_->insert(value);
         return *this;
     }
+
+    /**
+     * @brief Inserts element in the container (move version).
+     *
+     * Inserts an element (by moving it) in the container that
+     * was passed to the constructor. Always performs a blind insertion.
+     *
+     * @param value Element to insert (by moving it).
+     * @return Reference to @c this output iterator.
+     */
     insert_iterator& operator=(typename container_type::value_type&& value) {
         pc_->insert(std::move(value));
         return *this;
     }
 
-    // No-op required to meet the requirements of OutputIterator
+    /**
+     * @brief No-op.
+     *
+     * Operator provided to conform with the @c OutputIterator
+     * concept. A no-op that simply returns a reference to @c this.
+     *
+     * @return Reference to @c this output iterator
+     */
     insert_iterator& operator*() { return *this; }
+
+    /**
+     * @brief No-op.
+     *
+     * Operator provided to conform with the @c OutputIterator
+     * concept. A no-op that simply returns a reference to @c this.
+     *
+     * @return Reference to @c this output iterator
+     */
     insert_iterator& operator++() { return *this; }
+
+    /**
+     * @brief No-op.
+     *
+     * Operator provided to conform with the @c OutputIterator
+     * concept. A no-op that simply returns a reference to @c this.
+     *
+     * @return Reference to @c this output iterator
+     */
     insert_iterator& operator++(int) { return *this; }
 
     /// @cond NEVERSHOWN
