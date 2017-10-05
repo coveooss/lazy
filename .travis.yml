@@ -68,6 +68,7 @@ matrix:
         - g++-6
     env: COMPILER=clang++-5.0
   - os: osx
+    env: COMPILER=clang++
 script:
 - $COMPILER --version
 - make CXX=$COMPILER
