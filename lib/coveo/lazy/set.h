@@ -62,11 +62,11 @@ namespace lazy {
  * @tparam _Alloc Allocator used for the set elements.
  *                Defaults to <tt>std::allocator</tt>.
  */
-template<typename K,
-         typename _Cmp = std::less<K>,
-         template<typename _ImplT, typename _ImplAlloc> typename _Impl = std::vector,
-         typename _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
-         typename _Alloc = std::allocator<K>>
+template<class K,
+         class _Cmp = std::less<K>,
+         template<class _ImplT, class _ImplAlloc> class _Impl = std::vector,
+         class _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
+         class _Alloc = std::allocator<K>>
  using set = detail::lazy_sorted_container<K,
                                            void,
                                            K,
@@ -119,11 +119,11 @@ template<typename K,
  * @tparam _Alloc Allocator used for the set elements.
  *                Defaults to <tt>std::allocator</tt>.
  */
-template<typename K,
-         typename _Cmp = std::less<K>,
-         template<typename _ImplT, typename _ImplAlloc> typename _Impl = std::vector,
-         typename _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
-         typename _Alloc = std::allocator<K>>
+template<class K,
+         class _Cmp = std::less<K>,
+         template<class _ImplT, class _ImplAlloc> class _Impl = std::vector,
+         class _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
+         class _Alloc = std::allocator<K>>
  using multiset = detail::lazy_sorted_container<K,
                                                 void,
                                                 K,

@@ -26,7 +26,7 @@ namespace lazy {
  *
  * @see coveo::lazy::inserter()
  */
-template<typename Container>
+template<class Container>
 class insert_iterator
 {
 public:
@@ -179,7 +179,7 @@ protected:
  *
  * @see coveo::lazy::insert_iterator
  */
-template<typename Container> auto inserter(Container& c) {
+template<class Container> auto inserter(Container& c) {
     return insert_iterator<Container>(c);
 }
 

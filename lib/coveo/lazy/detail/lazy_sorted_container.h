@@ -96,14 +96,14 @@ struct incomplete_type;
  * and non-member functions. Inspired by
  * http://stackoverflow.com/a/257382 and others.
  */
-template<typename T>
+template<class T>
 class has_operator_equal
 {
     static_assert(sizeof(std::int_least8_t) != sizeof(std::int_least32_t),
                   "has_operator_equal only works if int_least8_t has a different size than int_least32_t");
 
-    template<typename C> static std::int_least8_t  test(decltype(std::declval<C>() == std::declval<C>())*); // Will be selected if operator== exists for C
-    template<typename C> static std::int_least32_t test(...);                                               // Will be selected otherwise
+    template<class C> static std::int_least8_t  test(decltype(std::declval<C>() == std::declval<C>())*); // Will be selected if operator== exists for C
+    template<class C> static std::int_least32_t test(...);                                               // Will be selected otherwise
 public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
@@ -117,14 +117,14 @@ public:
  * <tt>reserve()</tt> method that is callable with a
  * single argument of the given type.
  */
-template<typename T, typename SizeT>
+template<class T, class SizeT>
 class has_reserve_method
 {
     static_assert(sizeof(std::int_least8_t) != sizeof(std::int_least32_t),
                   "has_reserve_method only works if int_least8_t has a different size than int_least32_t");
 
-    template<typename C> static std::int_least8_t  test(decltype(std::declval<C>().reserve(std::declval<SizeT>()))*);   // Will be selected if C has reserve() accepting SizeT
-    template<typename C> static std::int_least32_t test(...);                                                           // Will be selected otherwise
+    template<class C> static std::int_least8_t  test(decltype(std::declval<C>().reserve(std::declval<SizeT>()))*);   // Will be selected if C has reserve() accepting SizeT
+    template<class C> static std::int_least32_t test(...);                                                           // Will be selected otherwise
 public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
@@ -138,14 +138,14 @@ public:
  * <tt>capacity() const</tt> method that returns a
  * non-<tt>void</tt> result.
  */
-template<typename T>
+template<class T>
 class has_capacity_const_method
 {
     static_assert(sizeof(std::int_least8_t) != sizeof(std::int_least32_t),
                   "has_capacity_method only works if int_least8_t has a different size than int_least32_t");
 
-    template<typename C> static std::int_least8_t  test(std::enable_if_t<!std::is_void<decltype(std::declval<const C>().capacity())>::value, void*>);   // Will be selected if C has capacity() that does not return void
-    template<typename C> static std::int_least32_t test(...);                                                                                           // Will be selected otherwise
+    template<class C> static std::int_least8_t  test(std::enable_if_t<!std::is_void<decltype(std::declval<const C>().capacity())>::value, void*>);   // Will be selected if C has capacity() that does not return void
+    template<class C> static std::int_least32_t test(...);                                                                                           // Will be selected otherwise
 public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
@@ -158,14 +158,14 @@ public:
  * Type trait that can be used to know if a type has a
  * <tt>shrink_to_fit()</tt> method.
  */
-template<typename T>
+template<class T>
 class has_shrink_to_fit_method
 {
     static_assert(sizeof(std::int_least8_t) != sizeof(std::int_least32_t),
                   "has_shrink_to_fit_method only works if int_least8_t has a different size than int_least32_t");
 
-    template<typename C> static std::int_least8_t  test(decltype(std::declval<C>().shrink_to_fit())*);  // Will be selected if C has shrink_to_fit()
-    template<typename C> static std::int_least32_t test(...);                                           // Will be selected otherwise
+    template<class C> static std::int_least8_t  test(decltype(std::declval<C>().shrink_to_fit())*);  // Will be selected if C has shrink_to_fit()
+    template<class C> static std::int_least32_t test(...);                                           // Will be selected otherwise
 public:
     static const bool value = sizeof(test<T>(nullptr)) == sizeof(std::int_least8_t);
 };
@@ -184,15 +184,15 @@ public:
  * @tparam VToK Predicate that can extract a key for a value.
  * @tparam KPred Key-based predicate to proxy.
  */
-template<typename V,
-         typename VToK,
-         typename KPred>
+template<class V,
+         class VToK,
+         class KPred>
 class lazy_value_pred_proxy
 {
     VToK vtok_;
     KPred kpr_;
 public:
-    template<typename OVToK, typename OKPred>
+    template<class OVToK, class OKPred>
     lazy_value_pred_proxy(OVToK&& vtok, OKPred&& kpr)
         : vtok_(std::forward<OVToK>(vtok)), kpr_(std::forward<OKPred>(kpr)) { }
 
@@ -206,13 +206,13 @@ public:
     }
 
     // Act on a value and a key, or any object that the key-based predicate supports
-    template<typename OK,
-             typename = std::enable_if_t<!std::is_same<OK, V>::value && !std::is_base_of<V, OK>::value, void>>
+    template<class OK,
+             class = std::enable_if_t<!std::is_same<OK, V>::value && !std::is_base_of<V, OK>::value, void>>
     decltype(auto) operator()(const V& left, const OK& rightk) const {
         return kpr_(vtok_(left), rightk);
     }
-    template<typename OK,
-             typename = std::enable_if_t<!std::is_same<OK, V>::value && !std::is_base_of<V, OK>::value, void>>
+    template<class OK,
+             class = std::enable_if_t<!std::is_same<OK, V>::value && !std::is_base_of<V, OK>::value, void>>
     decltype(auto) operator()(const OK& leftk, const V& right) const {
         return kpr_(leftk, vtok_(right));
     }
@@ -235,11 +235,11 @@ public:
  * @tparam _Diff Type used for differences between iterators.
  *               Uses <tt>std::iterator_traits</tt> by default.
  */
-template<typename It,
-         typename V,
-         typename PubV,
-         typename _ItCat = typename std::iterator_traits<It>::iterator_category,
-         typename _Diff = typename std::iterator_traits<It>::difference_type>
+template<class It,
+         class V,
+         class PubV,
+         class _ItCat = typename std::iterator_traits<It>::iterator_category,
+         class _Diff = typename std::iterator_traits<It>::difference_type>
 class forward_iterator_proxy : public std::iterator<_ItCat, PubV, _Diff, PubV*, PubV&>
 {
     static_assert(std::is_base_of<std::forward_iterator_tag, _ItCat>::value,
@@ -248,12 +248,12 @@ class forward_iterator_proxy : public std::iterator<_ItCat, PubV, _Diff, PubV*, 
                   "forward_iterator_proxy can only return references to base classes of their wrapped iterator's value_type");
 
     // Helper used to identify our type
-    template<typename T> struct is_forward_iterator_proxy : std::false_type { };
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class T> struct is_forward_iterator_proxy : std::false_type { };
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     struct is_forward_iterator_proxy<forward_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>> : std::true_type { };
     
     // Friend compatible iterators to be able to access it_
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     friend class forward_iterator_proxy;
 protected:
     It it_; // Iterator being proxied
@@ -262,33 +262,33 @@ public:
     forward_iterator_proxy() = default;
     forward_iterator_proxy(const forward_iterator_proxy& other) = default;
     forward_iterator_proxy(forward_iterator_proxy&& other) = default;
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     forward_iterator_proxy(const forward_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>& other)
         : it_(other.it_) { }
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     forward_iterator_proxy(forward_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&& other)
         : it_(std::move(other.it_)) { }
-    template<typename T,
-             typename = std::enable_if_t<!is_forward_iterator_proxy<std::decay_t<T>>::value, void>>
+    template<class T,
+             class = std::enable_if_t<!is_forward_iterator_proxy<std::decay_t<T>>::value, void>>
     forward_iterator_proxy(T&& obj) : it_(std::forward<T>(obj)) { }
-    template<typename T1, typename T2, typename... Tx>
+    template<class T1, class T2, class... Tx>
     forward_iterator_proxy(T1&& obj1, T2&& obj2, Tx&&... objx)
         : it_(std::forward<T1>(obj1), std::forward<T2>(obj2), std::forward<Tx>(objx)...) { }
 
     forward_iterator_proxy& operator=(const forward_iterator_proxy& other) = default;
     forward_iterator_proxy& operator=(forward_iterator_proxy&& other) = default;
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     forward_iterator_proxy& operator=(const forward_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>& other) {
         it_ = other.it_;
         return *this;
     }
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     forward_iterator_proxy& operator=(forward_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&& other) {
         it_ = std::move(other.it_);
         return *this;
     }
-    template<typename T,
-             typename = std::enable_if_t<!is_forward_iterator_proxy<std::decay_t<T>>::value, void>>
+    template<class T,
+             class = std::enable_if_t<!is_forward_iterator_proxy<std::decay_t<T>>::value, void>>
     forward_iterator_proxy& operator=(T&& obj) {
         it_ = std::forward<T>(obj);
         return *this;
@@ -337,52 +337,52 @@ public:
  * @tparam _Diff Type used for differences between iterators.
  *               Uses <tt>std::iterator_traits</tt> by default.
  */
-template<typename It,
-         typename V,
-         typename PubV,
-         typename _ItCat = typename std::iterator_traits<It>::iterator_category,
-         typename _Diff = typename std::iterator_traits<It>::difference_type>
+template<class It,
+         class V,
+         class PubV,
+         class _ItCat = typename std::iterator_traits<It>::iterator_category,
+         class _Diff = typename std::iterator_traits<It>::difference_type>
 class bidirectional_iterator_proxy : public forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>
 {
     static_assert(std::is_base_of<std::bidirectional_iterator_tag, _ItCat>::value,
                   "bidirectional_iterator_proxy can only wrap bidirectional iterators");
 
     // Helper used to identify our type
-    template<typename T> struct is_bidirectional_iterator_proxy : std::false_type { };
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class T> struct is_bidirectional_iterator_proxy : std::false_type { };
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     struct is_bidirectional_iterator_proxy<bidirectional_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>> : std::true_type { };
 public:
     bidirectional_iterator_proxy() = default;
     bidirectional_iterator_proxy(const bidirectional_iterator_proxy& other) = default;
     bidirectional_iterator_proxy(bidirectional_iterator_proxy&& other) = default;
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     bidirectional_iterator_proxy(const bidirectional_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>& other)
         : forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>(static_cast<const forward_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&>(other)) { }
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     bidirectional_iterator_proxy(bidirectional_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&& other)
         : forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>(static_cast<forward_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&&>(other)) { }
-    template<typename T,
-             typename = std::enable_if_t<!is_bidirectional_iterator_proxy<std::decay_t<T>>::value, void>>
+    template<class T,
+             class = std::enable_if_t<!is_bidirectional_iterator_proxy<std::decay_t<T>>::value, void>>
     bidirectional_iterator_proxy(T&& obj)
         : forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>(std::forward<T>(obj)) { }
-    template<typename T1, typename T2, typename... Tx>
+    template<class T1, class T2, class... Tx>
     bidirectional_iterator_proxy(T1&& obj1, T2&& obj2, Tx&&... objx)
         : forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>(std::forward<T1>(obj1), std::forward<T2>(obj2), std::forward<Tx>(objx)...) { }
 
     bidirectional_iterator_proxy& operator=(const bidirectional_iterator_proxy& other) = default;
     bidirectional_iterator_proxy& operator=(bidirectional_iterator_proxy&& other) = default;
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     bidirectional_iterator_proxy& operator=(const bidirectional_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>& other) {
         forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>::operator=(other);
         return *this;
     }
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     bidirectional_iterator_proxy& operator=(bidirectional_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&& other) {
         forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>::operator=(std::move(other));
         return *this;
     }
-    template<typename T,
-             typename = std::enable_if_t<!is_bidirectional_iterator_proxy<std::decay_t<T>>::value, void>>
+    template<class T,
+             class = std::enable_if_t<!is_bidirectional_iterator_proxy<std::decay_t<T>>::value, void>>
     bidirectional_iterator_proxy& operator=(T&& obj) {
         forward_iterator_proxy<It, V, PubV, _ItCat, _Diff>::operator=(std::forward<T>(obj));
         return *this;
@@ -426,52 +426,52 @@ public:
  * @tparam _Diff Type used for differences between iterators.
  *               Uses <tt>std::iterator_traits</tt> by default.
  */
-template<typename It,
-         typename V,
-         typename PubV,
-         typename _ItCat = typename std::iterator_traits<It>::iterator_category,
-         typename _Diff = typename std::iterator_traits<It>::difference_type>
+template<class It,
+         class V,
+         class PubV,
+         class _ItCat = typename std::iterator_traits<It>::iterator_category,
+         class _Diff = typename std::iterator_traits<It>::difference_type>
 class random_access_iterator_proxy : public bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>
 {
     static_assert(std::is_base_of<std::random_access_iterator_tag, _ItCat>::value,
                   "random_access_iterator_proxy can only wrap random-access iterators");
 
     // Helper used to identify our type
-    template<typename T> struct is_random_access_iterator_proxy : std::false_type { };
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class T> struct is_random_access_iterator_proxy : std::false_type { };
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     struct is_random_access_iterator_proxy<random_access_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>> : std::true_type { };
 public:
     random_access_iterator_proxy() = default;
     random_access_iterator_proxy(const random_access_iterator_proxy& other) = default;
     random_access_iterator_proxy(random_access_iterator_proxy&& other) = default;
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     random_access_iterator_proxy(const random_access_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>& other)
         : bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>(static_cast<const bidirectional_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&>(other)) { }
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     random_access_iterator_proxy(random_access_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&& other)
         : bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>(static_cast<bidirectional_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&&>(other)) { }
-    template<typename T,
-             typename = std::enable_if_t<!is_random_access_iterator_proxy<std::decay_t<T>>::value, void>>
+    template<class T,
+             class = std::enable_if_t<!is_random_access_iterator_proxy<std::decay_t<T>>::value, void>>
     random_access_iterator_proxy(T&& obj)
         : bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>(std::forward<T>(obj)) { }
-    template<typename T1, typename T2, typename... Tx>
+    template<class T1, class T2, class... Tx>
     random_access_iterator_proxy(T1&& obj1, T2&& obj2, Tx&&... objx)
         : bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>(std::forward<T1>(obj1), std::forward<T2>(obj2), std::forward<Tx>(objx)...) { }
 
     random_access_iterator_proxy& operator=(const random_access_iterator_proxy& other) = default;
     random_access_iterator_proxy& operator=(random_access_iterator_proxy&& other) = default;
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     random_access_iterator_proxy& operator=(const random_access_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>& other) {
         bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>::operator=(other);
         return *this;
     }
-    template<typename OIt, typename OV, typename OPubV, typename _OItCat, typename _ODiff>
+    template<class OIt, class OV, class OPubV, class _OItCat, class _ODiff>
     random_access_iterator_proxy& operator=(random_access_iterator_proxy<OIt, OV, OPubV, _OItCat, _ODiff>&& other) {
         bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>::operator=(std::move(other));
         return *this;
     }
-    template<typename T,
-             typename = std::enable_if_t<!is_random_access_iterator_proxy<std::decay_t<T>>::value, void>>
+    template<class T,
+             class = std::enable_if_t<!is_random_access_iterator_proxy<std::decay_t<T>>::value, void>>
     random_access_iterator_proxy& operator=(T&& obj) {
         bidirectional_iterator_proxy<It, V, PubV, _ItCat, _Diff>::operator=(std::forward<T>(obj));
         return *this;
@@ -561,11 +561,11 @@ public:
  * @tparam _Diff Type used for differences between iterators.
  *               Uses <tt>std::iterator_traits</tt> by default.
  */
-template<typename It,
-         typename V,
-         typename PubV,
-         typename _ItCat = typename std::iterator_traits<It>::iterator_category,
-         typename _Diff = typename std::iterator_traits<It>::difference_type>
+template<class It,
+         class V,
+         class PubV,
+         class _ItCat = typename std::iterator_traits<It>::iterator_category,
+         class _Diff = typename std::iterator_traits<It>::difference_type>
 using iterator_proxy = std::conditional_t<std::is_pointer<It>::value,
                                           PubV*,
                             std::conditional_t<std::is_base_of<std::random_access_iterator_tag, _ItCat>::value,
@@ -596,11 +596,11 @@ using iterator_proxy = std::conditional_t<std::is_pointer<It>::value,
  * @tparam _Diff Type used for differences between iterators.
  *               Uses <tt>std::iterator_traits</tt> by default.
  */
-template<typename It,
-         typename V,
-         typename PubV,
-         typename _ItCat = typename std::iterator_traits<It>::iterator_category,
-         typename _Diff = typename std::iterator_traits<It>::difference_type>
+template<class It,
+         class V,
+         class PubV,
+         class _ItCat = typename std::iterator_traits<It>::iterator_category,
+         class _Diff = typename std::iterator_traits<It>::difference_type>
 using conditional_iterator_proxy = std::conditional_t<std::is_same<PubV, V>::value,
                                                       It,
                                                       iterator_proxy<It, V, PubV, _ItCat, _Diff>>;
@@ -619,10 +619,10 @@ using conditional_iterator_proxy = std::conditional_t<std::is_same<PubV, V>::val
  */
 template<bool Multi> struct sort_lazy_container_if_needed_and_not_multi;
 template<> struct sort_lazy_container_if_needed_and_not_multi<true> {
-    template<typename LazyC> void operator()(LazyC&) const { }
+    template<class LazyC> void operator()(LazyC&) const { }
 };
 template<> struct sort_lazy_container_if_needed_and_not_multi<false> {
-    template<typename LazyC> void operator()(LazyC& c) const { c.sort_if_needed(); }
+    template<class LazyC> void operator()(LazyC& c) const { c.sort_if_needed(); }
 };
 
 /**
@@ -637,14 +637,14 @@ template<> struct sort_lazy_container_if_needed_and_not_multi<false> {
  */
 template<bool Multi> struct sort_lazy_container_elements;
 template<> struct sort_lazy_container_elements<true> {
-    template<typename LazyC> void operator()(LazyC& c) const {
+    template<class LazyC> void operator()(LazyC& c) const {
         // For multi-value containers, we need to use std::stable_sort() because order
         // of equivalent elements must be preserved (since C++11).
         std::stable_sort(c.elements_.begin(), c.elements_.end(), c.vcmp_);
     }
 };
 template<> struct sort_lazy_container_elements<false> {
-    template<typename LazyC> void operator()(LazyC& c) const {
+    template<class LazyC> void operator()(LazyC& c) const {
         std::sort(c.elements_.begin(), c.elements_.end(), c.vcmp_);
         c.elements_.erase(std::unique(c.elements_.begin(), c.elements_.end(), c.veq_), c.elements_.end());
     }
@@ -664,12 +664,12 @@ template<> struct sort_lazy_container_elements<false> {
  */
 template<bool Multi> struct updated_lazy_container_sorted_flag_after_insert;
 template<> struct updated_lazy_container_sorted_flag_after_insert<true> {
-    template<typename LazyC> void operator()(LazyC& c) const {
+    template<class LazyC> void operator()(LazyC& c) const {
         c.sorted_ = !c.vcmp_(c.elements_.back(), *(c.elements_.crbegin() + 1));
     }
 };
 template<> struct updated_lazy_container_sorted_flag_after_insert<false> {
-    template<typename LazyC> void operator()(LazyC& c) const {
+    template<class LazyC> void operator()(LazyC& c) const {
         c.sorted_ = c.vcmp_(*(c.elements_.crbegin() + 1), c.elements_.back());
     }
 };
@@ -684,7 +684,7 @@ template<> struct updated_lazy_container_sorted_flag_after_insert<false> {
  * @tparam T Type of values bound to the container's keys, or @c void if
  *           the container is not a map.
  */
-template<typename T> struct mapped_type_base {
+template<class T> struct mapped_type_base {
     /**
      * @brief Type of values stored in the map. Absent for set-like containers.
      */
@@ -747,15 +747,15 @@ template<> struct mapped_type_base<void> { };
  * @tparam Multi Whether container is allowed to have duplicates. Set this to
  *               @c true for <tt>std::multiset/multimap</tt>-like containers.
  */
-template<typename K,
-         typename T,
-         typename V,
-         typename PubV,
-         typename VToK,
-         typename KCmp,
-         typename KEq,
-         typename Alloc,
-         template<typename _ImplT, typename _ImplAlloc> typename Impl,
+template<class K,
+         class T,
+         class V,
+         class PubV,
+         class VToK,
+         class KCmp,
+         class KEq,
+         class Alloc,
+         template<class _ImplT, class _ImplAlloc> class Impl,
          bool Multi,
          bool _IsNonMultiMap = !std::is_void<T>::value && !Multi>
 class lazy_sorted_container : public mapped_type_base<T>
@@ -1027,11 +1027,11 @@ public:
      * @param keq @c key_equal_to instance to use for this container. Defaults to
      *            a default-constructed <tt>lazy_sorted_container::key_equal_to</tt>.
      */
-    template<typename It> lazy_sorted_container(It first,
-                                                It last,
-                                                const key_compare& kcmp = key_compare(),
-                                                const allocator_type& alloc = allocator_type(),
-                                                const key_equal_to& keq = key_equal_to())
+    template<class It> lazy_sorted_container(It first,
+                                             It last,
+                                             const key_compare& kcmp = key_compare(),
+                                             const allocator_type& alloc = allocator_type(),
+                                             const key_equal_to& keq = key_equal_to())
         : elements_(first, last, alloc), sorted_(elements_.size() <= 1),
           vtok_(), vcmp_(vtok_, kcmp), veq_(vtok_, keq) { }
 
@@ -1045,9 +1045,9 @@ public:
      * @param last End of the range of elements to insert in the container (exclusive).
      * @param alloc @c allocator_type instance to use for this container.
      */
-    template<typename It> lazy_sorted_container(It first,
-                                                It last,
-                                                const allocator_type& alloc)
+    template<class It> lazy_sorted_container(It first,
+                                             It last,
+                                             const allocator_type& alloc)
         : lazy_sorted_container(first, last, key_compare(), alloc) { }
 
     /**
@@ -1284,8 +1284,8 @@ public:
      * @throw coveo::lazy::out_of_range No element with that key exists.
      * @remarks This method is only available for non-multi maps.
      */
-    template<typename _T = T,
-             typename _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
+    template<class _T = T,
+             class _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
     _TRef at(const key_type& key) {
         sort_if_needed();
         auto elem_end = elements_.end();
@@ -1307,8 +1307,8 @@ public:
      * @throw coveo::lazy::out_of_range No element with that key exists.
      * @remarks This method is only available for non-multi maps.
      */
-    template<typename _T = T,
-             typename _CTRef = std::enable_if_t<_IsNonMultiMap, const _T&>>
+    template<class _T = T,
+             class _CTRef = std::enable_if_t<_IsNonMultiMap, const _T&>>
     _CTRef at(const key_type& key) const {
         sort_if_needed();
         auto elem_cend = elements_.cend();
@@ -1330,8 +1330,8 @@ public:
      * @return Reference to the element associated with @c key.
      * @remarks This method is only available for non-multi maps.
      */
-    template<typename _T = T,
-             typename _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
+    template<class _T = T,
+             class _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
     _TRef operator[](const key_type& key) {
         return operator_brackets_impl(key);
     }
@@ -1350,8 +1350,8 @@ public:
      * @return Reference to the element associated with @c key.
      * @remarks This method is only available for non-multi maps.
      */
-    template<typename _T = T,
-             typename _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
+    template<class _T = T,
+             class _TRef = std::enable_if_t<_IsNonMultiMap, _T&>>
     _TRef operator[](key_type&& key) {
         return operator_brackets_impl(std::move(key));
     }
@@ -1623,7 +1623,7 @@ public:
      * @remark This method is only available if the internal container implementation
      *         (e.g. <tt>lazy_sorted_container::container_impl</tt>) supports it.
      */
-    template<typename = std::enable_if_t<has_reserve_method<container_impl, size_type>::value, void>>
+    template<class = std::enable_if_t<has_reserve_method<container_impl, size_type>::value, void>>
     void reserve(size_type new_cap) {
         elements_.reserve(new_cap);
     }
@@ -1639,7 +1639,7 @@ public:
      * @remark This method is only available if the internal container implementation
      *         (e.g. <tt>lazy_sorted_container::container_impl</tt>) supports it.
      */
-    template<typename = std::enable_if_t<has_capacity_const_method<container_impl>::value, void>>
+    template<class = std::enable_if_t<has_capacity_const_method<container_impl>::value, void>>
     auto capacity() const {
         return elements_.capacity();
     }
@@ -1654,7 +1654,7 @@ public:
      * @remark This method is only available if the internal container implementation
      *         (e.g. <tt>lazy_sorted_container::container_impl</tt>) supports it.
      */
-    template<typename = std::enable_if_t<has_shrink_to_fit_method<container_impl>::value, void>>
+    template<class = std::enable_if_t<has_shrink_to_fit_method<container_impl>::value, void>>
     void shrink_to_fit() {
         elements_.shrink_to_fit();
     }
@@ -1738,7 +1738,7 @@ public:
      * @param first Beginning of range of elements to insert.
      * @param last End of range of elements to insert.
      */
-    template<typename It> void insert(It first, It last) {
+    template<class It> void insert(It first, It last) {
         // Checking if container is sorted would be onerous for batch inserts.
         elements_.insert(elements_.cend(), first, last);
         sorted_ = elements_.size() <= 1;
@@ -1771,7 +1771,7 @@ public:
      * @remark In order to support lazy sorting, this method returns
      *         @c void instead of a <tt>pair<iterator, bool></tt>.
      */
-    template<typename... Args> void emplace(Args&&... args) {
+    template<class... Args> void emplace(Args&&... args) {
         elements_.emplace_back(std::forward<Args>(args)...);
         if (sorted_) {
             update_sorted_after_push_back();
@@ -1795,7 +1795,7 @@ public:
      * @remark In order to support lazy sorting, this method returns
      *         @c void instead of an @c iterator.
      */
-    template<typename... Args> void emplace_hint(const_iterator hint, Args&&... args) {
+    template<class... Args> void emplace_hint(const_iterator hint, Args&&... args) {
         // Ignore hint iterator in favor of lazy sorting
         emplace(std::forward<Args>(args)...);
     }
@@ -1914,9 +1914,9 @@ public:
      *         assigned to.
      * @remark This method is only available for non-multi maps.
      */
-    template<typename OT,
+    template<class OT,
              bool _Enabled = _IsNonMultiMap,
-             typename = std::enable_if_t<_Enabled, void>>
+             class = std::enable_if_t<_Enabled, void>>
     std::pair<iterator, bool> insert_or_assign(const key_type& key, OT&& val) {
         return insert_or_assign_impl(key, std::forward<OT>(val));
     }
@@ -1936,9 +1936,9 @@ public:
      *         assigned to.
      * @remark This method is only available for non-multi maps.
      */
-    template<typename OT,
+    template<class OT,
              bool _Enabled = _IsNonMultiMap,
-             typename = std::enable_if_t<_Enabled, void>>
+             class = std::enable_if_t<_Enabled, void>>
     std::pair<iterator, bool> insert_or_assign(key_type&& key, OT&& val) {
         return insert_or_assign_impl(std::move(key), std::forward<OT>(val));
     }
@@ -1964,9 +1964,9 @@ public:
      *         be @c true if element was added or @c false if it already existed.
      * @remark This method is only available for non-multi maps.
      */
-    template<typename... Args,
+    template<class... Args,
              bool _Enabled = _IsNonMultiMap,
-             typename = std::enable_if_t<_Enabled, void>>
+             class = std::enable_if_t<_Enabled, void>>
     std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args) {
         return try_emplace_impl(key, std::forward<Args>(args)...);
     }
@@ -1992,9 +1992,9 @@ public:
      *         be @c true if element was added or @c false if it already existed.
      * @remark This method is only available for non-multi maps.
      */
-    template<typename... Args,
+    template<class... Args,
              bool _Enabled = _IsNonMultiMap,
-             typename = std::enable_if_t<_Enabled, void>>
+             class = std::enable_if_t<_Enabled, void>>
     std::pair<iterator, bool> try_emplace(key_type&& key, Args&&... args) {
         return try_emplace_impl(std::move(key), std::forward<Args>(args)...);
     }
@@ -2177,9 +2177,9 @@ public:
      *         <tt>std::less<></tt>. For more info, see
      *         http://en.cppreference.com/w/cpp/utility/functional/less_void
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     size_type count(const OK& key) const {
         auto range = equal_range(key);
         return std::distance(range.first, range.second);
@@ -2201,9 +2201,9 @@ public:
      *         <tt>std::less<></tt>. For more info, see
      *         http://en.cppreference.com/w/cpp/utility/functional/less_void
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     iterator find(const OK& key) {
         sort_if_needed();
         auto elem_end = elements_.end();
@@ -2227,9 +2227,9 @@ public:
      *         <tt>std::less<></tt>. For more info, see
      *         http://en.cppreference.com/w/cpp/utility/functional/less_void
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     const_iterator find(const OK& key) const {
         sort_if_needed();
         auto elem_cend = elements_.cend();
@@ -2257,9 +2257,9 @@ public:
      * @see lazy_sorted_container::upper_bound(const OK&)
      * @see lazy_sorted_container::equal_range(const OK&)
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     iterator lower_bound(const OK& key) {
         sort_if_needed();
         return std::lower_bound(elements_.begin(), elements_.end(), key, vcmp_);
@@ -2285,9 +2285,9 @@ public:
      * @see lazy_sorted_container::upper_bound(const OK&)
      * @see lazy_sorted_container::equal_range(const OK&)
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     const_iterator lower_bound(const OK& key) const {
         sort_if_needed();
         return std::lower_bound(elements_.cbegin(), elements_.cend(), key, vcmp_);
@@ -2310,9 +2310,9 @@ public:
      * @see lazy_sorted_container::lower_bound(const OK&)
      * @see lazy_sorted_container::equal_range(const OK&)
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     iterator upper_bound(const OK& key) {
         sort_if_needed();
         return std::upper_bound(elements_.begin(), elements_.end(), key, vcmp_);
@@ -2335,9 +2335,9 @@ public:
      * @see lazy_sorted_container::lower_bound(const OK&)
      * @see lazy_sorted_container::equal_range(const OK&)
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     const_iterator upper_bound(const OK& key) const {
         sort_if_needed();
         return std::upper_bound(elements_.cbegin(), elements_.cend(), key, vcmp_);
@@ -2362,9 +2362,9 @@ public:
      * @see lazy_sorted_container::lower_bound(const OK&)
      * @see lazy_sorted_container::upper_bound(const OK&)
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     std::pair<iterator, iterator> equal_range(const OK& key) {
         sort_if_needed();
         return std::equal_range(elements_.begin(), elements_.end(), key, vcmp_);
@@ -2389,9 +2389,9 @@ public:
      * @see lazy_sorted_container::lower_bound(const OK&)
      * @see lazy_sorted_container::upper_bound(const OK&)
      */
-    template<typename OK,
-             typename _OKCmp = key_compare,
-             typename = typename _OKCmp::is_transparent>
+    template<class OK,
+             class _OKCmp = key_compare,
+             class = typename _OKCmp::is_transparent>
     std::pair<const_iterator, const_iterator> equal_range(const OK& key) const {
         sort_if_needed();
         return std::equal_range(elements_.cbegin(), elements_.cend(), key, vcmp_);
@@ -2511,9 +2511,9 @@ private:
     }
 
     // Internal implementation of operator[]. Works with both lvalue and rvalue references.
-    template<typename OK,
-             typename _T = T,
-             typename _TRef = std::enable_if_t<_IsNonMultiMap && std::is_same<std::decay_t<OK>, key_type>::value, _T&>>
+    template<class OK,
+             class _T = T,
+             class _TRef = std::enable_if_t<_IsNonMultiMap && std::is_same<std::decay_t<OK>, key_type>::value, _T&>>
     _TRef operator_brackets_impl(OK&& key) {
         sort_if_needed();
         auto elem_end = elements_.end();
@@ -2527,9 +2527,9 @@ private:
     }
 
     // Internal implementation of insert_or_assign(). Works with both lvalue and rvalue key references.
-    template<typename OK,
-             typename OT,
-             typename = std::enable_if_t<_IsNonMultiMap && std::is_same<std::decay_t<OK>, key_type>::value, void>>
+    template<class OK,
+             class OT,
+             class = std::enable_if_t<_IsNonMultiMap && std::is_same<std::decay_t<OK>, key_type>::value, void>>
     std::pair<iterator, bool> insert_or_assign_impl(OK&& key, OT&& val) {
         sort_if_needed();
         auto elem_end = elements_.end();
@@ -2546,9 +2546,9 @@ private:
     }
 
     // Internal implementation of try_emplace(). Works with both lvalue and rvalue key references.
-    template<typename OK,
-             typename... Args,
-             typename = std::enable_if_t<_IsNonMultiMap && std::is_same<std::decay_t<OK>, key_type>::value, void>>
+    template<class OK,
+             class... Args,
+             class = std::enable_if_t<_IsNonMultiMap && std::is_same<std::decay_t<OK>, key_type>::value, void>>
     std::pair<iterator, bool> try_emplace_impl(OK&& key, Args&&... args) {
         sort_if_needed();
         auto elem_end = elements_.end();
@@ -2568,7 +2568,6 @@ private:
         throw coveo::lazy::out_of_range("out_of_range");
     }
 };
-
 /**
  * @internal
  * @brief Predicate that implements "equal to" using a comparator like <tt>std::less</tt>.
@@ -2577,8 +2576,8 @@ private:
  * @tparam T Type of elements to compare.
  * @tparam _Cmp Comparator to use to implement equality. Defaults to <tt>std::less<T></tt>.
  */
-template<typename T,
-         typename _Cmp = std::less<T>>
+template<class T,
+         class _Cmp = std::less<T>>
 class equal_to_using_less
 {
     _Cmp cmp_;
@@ -2603,8 +2602,8 @@ public:
  * @tparam T Type of elements to compare.
  * @tparam _UnusedCmp Comparator to use to implement equality; unused.
  */
-template<typename T,
-         typename _UnusedCmp = std::less<T>>
+template<class T,
+         class _UnusedCmp = std::less<T>>
 struct equal_to_proxy : std::equal_to<T> {
     equal_to_proxy() = default;
     explicit equal_to_proxy(const _UnusedCmp&) : equal_to_proxy() { }
@@ -2624,8 +2623,8 @@ struct equal_to_proxy : std::equal_to<T> {
  * @tparam _Cmp Comparator to use to implement equality if <tt>operator==()</tt>
  *              is not available. Defaults to <tt>std::less<T></tt>.
  */
-template<typename T,
-         typename _Cmp = std::less<T>>
+template<class T,
+         class _Cmp = std::less<T>>
 using equal_to_using_less_if_needed = std::conditional_t<has_operator_equal<T>::value,
                                                          equal_to_proxy<T, _Cmp>,
                                                          equal_to_using_less<T, _Cmp>>;
@@ -2642,7 +2641,7 @@ using equal_to_using_less_if_needed = std::conditional_t<has_operator_equal<T>::
  *
  * @tparam T Type of value to project.
  */
-template<typename T>
+template<class T>
 struct identity {
     const T& operator()(const T& obj) const {
         return obj;
@@ -2659,7 +2658,7 @@ struct identity {
  *
  * @tparam P Type of pair to project the first element of.
  */
-template<typename P>
+template<class P>
 struct pair_first {
     decltype(auto) operator()(const P& obj) const {
         return std::get<0>(obj);
@@ -2684,20 +2683,20 @@ struct pair_first {
  * @tparam RT1 Type for the pair's first element. Implicitely @c const (see above).
  * @tparam T2 Type for the pair's second selement.
  */
-template<typename RT1,
-         typename T2,
-         typename _BaseStdPair = std::pair<const RT1, T2>>
+template<class RT1,
+         class T2,
+         class _BaseStdPair = std::pair<const RT1, T2>>
 class map_pair : public _BaseStdPair
 {
 public:
     // Typedef that can be used to refer to our base std::pair class.
-    typedef _BaseStdPair base_std_pair;
+    using base_std_pair = _BaseStdPair;
 
 private:
     // Helper constructor called by the piecewise constructor.
     // This trick is used to be able to get an integer_sequence
     // representing the indexes of arguments in the parameter pack.
-    template<typename Args1, typename Args2, size_t... Indexes1, size_t... Indexes2>
+    template<class Args1, class Args2, size_t... Indexes1, size_t... Indexes2>
     map_pair(Args1& fir_args, Args2& sec_args,
              std::index_sequence<Indexes1...>,
              std::index_sequence<Indexes2...>)
@@ -2718,7 +2717,7 @@ public:
 
     // Constructors with parameters for first and second.
     map_pair(const RT1& fir, const T2& sec) : base_std_pair(fir, sec) { }
-    template<typename U1, typename U2>
+    template<class U1, class U2>
     map_pair(U1&& fir, U2&& sec)
         : base_std_pair(std::forward<U1>(fir), std::forward<U2>(sec)) { }
 
@@ -2728,22 +2727,22 @@ public:
         : base_std_pair(std::move(const_cast<RT1&>(obj.first)), std::move(obj.second)) { }
 
     // Constructors from compatible map_pair's.
-    template<typename RU1, typename U2>
+    template<class RU1, class U2>
     map_pair(const map_pair<RU1, U2>& obj) : base_std_pair(obj) { }
-    template<typename RU1, typename U2>
+    template<class RU1, class U2>
     map_pair(map_pair<RU1, U2>&& obj)
         : base_std_pair(std::move(const_cast<RU1&>(obj.first)), std::move(obj.second)) { }
 
     // Constructors from std::pair.
-    template<typename U1, typename U2>
+    template<class U1, class U2>
     map_pair(const std::pair<U1, U2>& obj) : base_std_pair(obj) { }
-    template<typename U1, typename U2>
+    template<class U1, class U2>
     map_pair(std::pair<U1, U2>&& obj)
         : base_std_pair(std::move(const_cast<std::remove_reference_t<U1>&>(obj.first)), std::move(obj.second)) { }
 
     // Piecewise constructor. Calls the private helper constructor (see above)
     // to avoid copying/moving objects in the tuple one too many time.
-    template<typename... Args1, typename... Args2>
+    template<class... Args1, class... Args2>
     map_pair(std::piecewise_construct_t,
              std::tuple<Args1...> fir_args,
              std::tuple<Args2...> sec_args)
@@ -2757,7 +2756,7 @@ public:
         }
         return *this;
     }
-    template<typename RU1, typename U2>
+    template<class RU1, class U2>
     map_pair& operator=(const map_pair<RU1, U2>& obj) {
         const_cast<RT1&>(this->first) = obj.first;
         this->second = obj.second;
@@ -2770,7 +2769,7 @@ public:
         this->second = std::move(obj.second);
         return *this;
     }
-    template<typename RU1, typename U2>
+    template<class RU1, class U2>
     map_pair& operator=(map_pair<RU1, U2>&& obj) {
         const_cast<RT1&>(this->first) = std::move(const_cast<RU1&>(obj.first));
         this->second = std::move(obj.second);
@@ -2778,7 +2777,7 @@ public:
     }
 
     // Assignment operator from std::pair.
-    template<typename U1, typename U2>
+    template<class U1, class U2>
     map_pair& operator=(const std::pair<U1, U2>& obj) {
         const_cast<RT1&>(this->first) = obj.first;
         this->second = obj.second;
@@ -2786,7 +2785,7 @@ public:
     }
 
     // Move assignment operator from std::pair.
-    template<typename U1, typename U2>
+    template<class U1, class U2>
     map_pair& operator=(std::pair<U1, U2>&& obj) {
         const_cast<RT1&>(this->first) = std::move(const_cast<std::remove_reference_t<U1>&>(obj.first));
         this->second = std::move(obj.second);
@@ -2826,9 +2825,9 @@ public:
  * @tparam T Type for the map pair's second element.
  * @tparam _Alloc Type of allocator to use. Defaults to <tt>std::allocator</tt>.
  */
-template<typename K,
-         typename T,
-         template<typename _AllocT> typename _Alloc = std::allocator>
+template<class K,
+         class T,
+         template<class _AllocT> class _Alloc = std::allocator>
 using map_allocator = _Alloc<map_pair<K, T>>;
 
 /// @endcond

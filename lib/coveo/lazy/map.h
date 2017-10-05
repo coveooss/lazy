@@ -41,9 +41,9 @@ namespace lazy {
  *                a template type accepting a single argument. By default,
  *                the allocator type is <tt>std::allocator</tt>.
  */
-template<typename K,
-         typename T,
-         template<typename _AllocT> typename _Alloc = std::allocator>
+template<class K,
+         class T,
+         template<class _AllocT> class _Alloc = std::allocator>
 using map_allocator = detail::map_allocator<K, T, _Alloc>;
 
 /**
@@ -89,12 +89,12 @@ using map_allocator = detail::map_allocator<K, T, _Alloc>;
  * @tparam _Alloc Allocator used for the map elements.
  *                Defaults to @c map_allocator.
  */
-template<typename K,
-         typename T,
-         typename _Cmp = std::less<K>,
-         template<typename _ImplT, typename _ImplAlloc> typename _Impl = std::vector,
-         typename _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
-         typename _Alloc = map_allocator<K, T>>
+template<class K,
+         class T,
+         class _Cmp = std::less<K>,
+         template<class _ImplT, class _ImplAlloc> class _Impl = std::vector,
+         class _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
+         class _Alloc = map_allocator<K, T>>
  using map = detail::lazy_sorted_container<K,
                                            T,
                                            detail::map_pair<K, T>,
@@ -148,12 +148,12 @@ template<typename K,
  * @tparam _Alloc Allocator used for the map elements.
  *                Defaults to @c map_allocator.
  */
-template<typename K,
-         typename T,
-         typename _Cmp = std::less<K>,
-         template<typename _ImplT, typename _ImplAlloc> typename _Impl = std::vector,
-         typename _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
-         typename _Alloc = map_allocator<K, T>>
+template<class K,
+         class T,
+         class _Cmp = std::less<K>,
+         template<class _ImplT, class _ImplAlloc> class _Impl = std::vector,
+         class _Eq = detail::equal_to_using_less_if_needed<K, _Cmp>,
+         class _Alloc = map_allocator<K, T>>
  using multimap = detail::lazy_sorted_container<K,
                                                 T,
                                                 detail::map_pair<K, T>,
