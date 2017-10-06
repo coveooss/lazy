@@ -13,20 +13,30 @@
 
 /**
  * @mainpage <tt>coveo::lazy</tt>
+ * @tableofcontents
+ * @section intro Introduction
  *
  * Welcome to the documentation of the <tt>coveo::lazy</tt> library.
- * This library implements four associative containers that are similar
- * (in terms of interface) to the associative containers provided by the
- * standard C++ library. The main difference is their implementation:
- * instead of storing elements in a tree-like structure, they store
- * their elements in a regular container (by default <tt>std::vector</tt>)
- * and perform sorting only when needed (when @c find is called, for
- * instance). This results in dramatically-reduced storage space, at
- * the cost of an expensive sorting operation once in a while.
+ * This library implements four associative containers:
+ * 
+ * - <tt>coveo::lazy::map</tt>
+ * - <tt>coveo::lazy::multimap</tt>
+ * - <tt>coveo::lazy::set</tt>
+ * - <tt>coveo::lazy::multiset</tt>
+ * 
+ * They are similar (in terms of interface) to the associative containers
+ * provided by the standard C++ library. The main difference is their
+ * implementation: instead of storing elements in a tree-like structure,
+ * they store their elements in a regular container (by default <tt>std::vector</tt>)
+ * and perform sorting only when needed (when @c find is called, for instance).
+ * This results in dramatically-reduced storage space, at the cost of an
+ * expensive sorting operation once in a while.
  *
  * These containers are designed to be used in situations where insertions
- * in the container are usually performed in batches, followed by queries.
- * They are simpler to use than manually sorting <tt>std::vector</tt>s.
+ * in the container are usually performed in batches, followed by a large
+ * number of queries.
+ *
+ * @section example Example
  *
  * Here is an example that uses <tt>coveo::lazy::set</tt>:
  *
@@ -54,6 +64,21 @@
  *       }
  *   }
  * @endcode
+ *
+ * @section install Installing
+ *
+ * The <tt>coveo::lazy</tt> library is header-only. Therefore, it is not
+ * necessary to "build" it to use. Simply copy the @c lib directory with all
+ * its files to a suitable place and add it to your project's include path.
+ *
+ * @section help Help / bugs / etc.
+ *
+ * Need help with the library? Found a bug? Please visit the <tt>coveo::lazy</tt>
+ * GitHub project page at:
+ *
+ * &nbsp;&nbsp;&nbsp;&nbsp;https://github.com/coveo/lazy
+ *
+ * There, you can file issues with questions or problems.
  *
  * @copyright 2015-2016, Coveo Solutions Inc.
  *            Distributed under the Apache License, Version 2.0 (see <a href="https://github.com/coveo/lazy/blob/master/LICENSE">LICENSE</a>).
@@ -1239,7 +1264,7 @@ public:
      *
      * @param left First container to compare.
      * @param right Second container to compare.
-     * @return @c true if @left is "less than or equal to" @c right.
+     * @return @c true if @c left is "less than or equal to" @c right.
      */
     friend bool operator<=(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         return !(right < left);
@@ -1253,7 +1278,7 @@ public:
      *
      * @param left First container to compare.
      * @param right Second container to compare.
-     * @return @c true if @left is "greater than" @c right.
+     * @return @c true if @c left is "greater than" @c right.
      */
     friend bool operator>(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         return right < left;
@@ -1267,7 +1292,7 @@ public:
      *
      * @param left First container to compare.
      * @param right Second container to compare.
-     * @return @c true if @left is "greater than or equal to" @c right.
+     * @return @c true if @c left is "greater than or equal to" @c right.
      */
     friend bool operator>=(const lazy_sorted_container& left, const lazy_sorted_container& right) {
         return !(left < right);
@@ -1791,6 +1816,7 @@ public:
      * Note that for maps, @c value_type is a pair and thus must
      * be constructed using one of <tt>std::pair</tt>'s constructors.
      *
+     * @param hint Hint iterator; unused.
      * @param args Arguments that will be forwarded to the element's constructor.
      * @remark In order to support lazy sorting, this method returns
      *         @c void instead of an @c iterator.
@@ -1834,7 +1860,7 @@ public:
      *
      * Removes all elements associated with the given key from the container.
      *
-     * @param Key of element(s) to remove.
+     * @param key Key of element(s) to remove.
      * @return Number of elements removed. For containers that do not accept
      *         duplicates, this can never be greater than 1.
      */
@@ -1886,7 +1912,7 @@ public:
      * without moving of copying elements; only pointers are swapped.
      *
      * This function is similar to the @c swap method, but can be found
-     * through ADL:
+     * through <a href="http://en.cppreference.com/w/cpp/language/adl">ADL</a>:
      *
      * @code
      *   swap(c1, c2); // No need for coveo::lazy::...

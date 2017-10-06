@@ -177,6 +177,8 @@ protected:
  * Creates an <tt>coveo::lazy::insert_iterator</tt> instance that
  * will perform blind insertions in container @c c.
  *
+ * @param c Container to insert into.
+ * @return @c insert_iterator that performs blind inserts in @c c.
  * @see coveo::lazy::insert_iterator
  */
 template<class Container> auto inserter(Container& c) {
