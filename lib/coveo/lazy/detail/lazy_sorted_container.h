@@ -12,7 +12,7 @@
  */
 
 /**
- * @mainpage <tt>coveo::lazy</tt>
+ * @mainpage <tt>coveo::lazy</tt> (<a href="https://github.com/coveo/lazy">GitHub</a>)
  * @tableofcontents
  * @section intro Introduction
  *
@@ -65,11 +65,20 @@
  *   }
  * @endcode
  *
- * @section install Installing
+ * @section install Installing / requirements
  *
  * The <tt>coveo::lazy</tt> library is header-only. Therefore, it is not
  * necessary to "build" it to use. Simply copy the @c lib directory with all
  * its files to a suitable place and add it to your project's include path.
+ *
+ * The library requires C++14 support. Several compilers meet
+ * that requirements, including the following (as tested by
+ * <a href="https://travis-ci.org/coveo/lazy">Continuous</a>
+ * <a href="https://ci.appveyor.com/project/clechasseur/lazy-dpgmg">Integration</a>):
+ *
+ * - GCC 5
+ * - Clang 3.8
+ * - Visual Studio 2015 Update 3
  *
  * @section help Help / bugs / etc.
  *
