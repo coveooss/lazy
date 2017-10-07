@@ -47,5 +47,5 @@ out/
 obj/
 
 # Documentation output
-doc/html/
-doc/latex/
+docs/
+latex/

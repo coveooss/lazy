@@ -1,1 +1,1 @@
-doxygen %~dp0\doc\Doxyfile
+doxygen %~dp0\Doxyfile
