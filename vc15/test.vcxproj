@@ -188,6 +188,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -210,6 +211,7 @@ copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -232,6 +234,7 @@ copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -254,6 +257,7 @@ copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -278,6 +282,7 @@ copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -304,6 +309,7 @@ copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -330,6 +336,7 @@ copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -356,6 +363,7 @@ copy /Y "$(TargetPath)" "$(SolutionDir)out\"</Command>
       <AdditionalIncludeDirectories>$(SolutionDir)lib;$(SolutionDir)tests%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

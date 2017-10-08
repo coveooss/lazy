@@ -25,11 +25,11 @@ namespace lazy {
 namespace detail {
 
 // Helpers to compare containers without using native operators.
-template<typename C1, typename C2>
+template<class C1, class C2>
 bool containers_are_equal(const C1& c1, const C2& c2) {
     return std::equal(std::begin(c1), std::end(c1), std::begin(c2), std::end(c2));
 }
-template<typename C1, typename C2>
+template<class C1, class C2>
 bool container_is_less_than(const C1& c1, const C2& c2) {
     return std::lexicographical_compare(std::begin(c1), std::end(c1), std::begin(c2), std::end(c2));
 }
@@ -55,7 +55,7 @@ public:
 
 // Performs a benchmark that inserts multiple elements in two sets,
 // then performs some set operations.
-template<typename SetT>
+template<class SetT>
 void benchmark_inserts_and_set_operations(const char* const test_name)
 {
     typedef SetT set_type;
@@ -127,7 +127,7 @@ void benchmark_inserts_and_set_operations(const char* const test_name)
 }
 
 // Performs a benchmark that mixes insertions and lookups in a set.
-template<typename SetT>
+template<class SetT>
 void benchmark_mixed_set_operations(const char* const test_name)
 {
     typedef SetT set_type;
