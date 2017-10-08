@@ -40,7 +40,7 @@ The library is header-only. Therefore, to add it to your project, simply copy th
 
 ## MOAR?
 
-Read further document and get API reference here: https://coveo.github.io/lazy
+Read further documentation and get API reference here: https://coveo.github.io/lazy
 
 ## License
 
