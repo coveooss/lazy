@@ -1360,6 +1360,9 @@ public:
      * container does not have such an element, a default-constructed
      * one is added and its reference is returned.
      *
+     * @note Invalidates all iterators and references except
+     *       for the return value.
+     *
      * @param key Key of element to look for.
      * @return Reference to the element associated with @c key.
      * @remarks This method is only available for non-multi maps.
@@ -1377,6 +1380,9 @@ public:
      * container does not have such an element, a default-constructed
      * one is added and associated with a key that is move-constructed
      * from @c key.
+     *
+     * @note Invalidates all iterators and references except
+     *       for the return value.
      *
      * @param key Key of element to look for. If the element does not
      *            exist, the key is moved to the container and associated
@@ -1698,6 +1704,8 @@ public:
      *
      * Inserts a new element in the container.
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param value Element to insert.
      * @remark In order to support lazy sorting, this method returns
      *         @c void instead of a <tt>pair<iterator, bool></tt>.
@@ -1715,6 +1723,8 @@ public:
      *
      * Inserts a new element in the container by moving it.
      * If the element supports move semantics, no copy is performed.
+     *
+     * @note Invalidates all iterators and references.
      *
      * @param value Element to move in the container.
      * @remark In order to support lazy sorting, this method returns
@@ -1735,6 +1745,8 @@ public:
      * This method accepts a hint iterator, but discards it in order
      * to support lazy sorting.
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param hint Hint iterator; unused.
      * @param value Element to insert.
      * @remark In order to support lazy sorting, this method returns
@@ -1754,6 +1766,8 @@ public:
      * This method accepts a hint iterator, but discards it in order
      * to support lazy sorting.
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param hint Hint iterator; unused.
      * @param value Element to move in the container.
      * @remark In order to support lazy sorting, this method returns
@@ -1769,6 +1783,8 @@ public:
      * Inserts all elements in the range <tt>[first, last[</tt>
      * in the container.
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param first Beginning of range of elements to insert.
      * @param last End of range of elements to insert.
      */
@@ -1783,6 +1799,8 @@ public:
      *
      * Inserts all elements in the given @c initializer_list in
      * the container.
+     *
+     * @note Invalidates all iterators and references.
      *
      * @param init @c initializer_list containing the elements to insert.
      */
@@ -1800,6 +1818,8 @@ public:
      *
      * Note that for maps, @c value_type is a pair and thus must
      * be constructed using one of <tt>std::pair</tt>'s constructors.
+     *
+     * @note Invalidates all iterators and references.
      *
      * @param args Arguments that will be forwarded to the element's constructor.
      * @remark In order to support lazy sorting, this method returns
@@ -1825,6 +1845,8 @@ public:
      * Note that for maps, @c value_type is a pair and thus must
      * be constructed using one of <tt>std::pair</tt>'s constructors.
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param hint Hint iterator; unused.
      * @param args Arguments that will be forwarded to the element's constructor.
      * @remark In order to support lazy sorting, this method returns
@@ -1839,6 +1861,8 @@ public:
      * @brief Removes an element from the container.
      *
      * Removes the element pointed to by the given iterator from the container.
+     *
+     * @note Invalidates all iterators and references.
      *
      * @param pos Iterator pointing at element to remove.
      * @return Iterator pointing at element following the removed element or,
@@ -1855,6 +1879,8 @@ public:
      * Removes all elements pointed to by iterators in the range
      * <tt>[first, last[</tt> from the container.
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param first Beginning of range of elements to remove.
      * @param last End of range of elements to remove.
      * @return Iterator pointing at element following the last element removed or,
@@ -1868,6 +1894,8 @@ public:
      * @brief Removes elements by key.
      *
      * Removes all elements associated with the given key from the container.
+     *
+     * @note Invalidates all iterators and references.
      *
      * @param key Key of element(s) to remove.
      * @return Number of elements removed. For containers that do not accept
@@ -1941,6 +1969,8 @@ public:
      * @c val (by forwarding it) to its associated value. Otherwise, inserts
      * a new element constructed by copying @c key and forwarding @c val.
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param key Key of element to insert or assign to.
      * @param val Value to insert or assign to @c key.
      * @return @c pair whose @c first element is an @c iterator pointing at
@@ -1962,6 +1992,8 @@ public:
      * If the container contains an element associated with @c key, assigns
      * @c val (by forwarding it) to its associated value. Otherwise, inserts
      * a new element constructed by moving @c key and forwarding @c val.
+     *
+     * @note Invalidates all iterators and references.
      *
      * @param key Key of element to move-insert or assign to.
      * @param val Value to insert or assign to @c key.
@@ -1992,6 +2024,8 @@ public:
      *              std::forward_as_tuple(std::forward<Args>(args)...))
      * @endcode
      *
+     * @note Invalidates all iterators and references.
+     *
      * @param key Key of element to try adding.
      * @param args Arguments to forward to the value's constructor.
      * @return @c pair whose @c first element is an @c iterator pointing at
@@ -2019,6 +2053,8 @@ public:
      *              std::forward_as_tuple(std::move(key)),
      *              std::forward_as_tuple(std::forward<Args>(args)...))
      * @endcode
+     *
+     * @note Invalidates all iterators and references.
      *
      * @param key Key of element to try adding (by moving it).
      * @param args Arguments to forward to the value's constructor.

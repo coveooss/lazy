@@ -41,7 +41,8 @@ namespace lazy {
  *
  * - Because it uses a sequence container internally, elements in the set might
  *   be moved/copied when an insertion occurs. Thus, this class cannot be used
- *   to store move-only types.
+ *   to store move-only types. Furthermore, inserting an element invalidates
+ *   all iterators and references.
  * - It needs a predicate to determine if two set elements are equal. If an
  *   <tt>operator==</tt> exists to compare instances of type @c K, it will be
  *   used; otherwise, it will use an implementation that uses @c key_compare
@@ -98,7 +99,8 @@ template<class K,
  *
  * - Because it uses a sequence container internally, elements in the set might
  *   be moved/copied when an insertion occurs. Thus, this class cannot be used
- *   to store move-only types.
+ *   to store move-only types. Furthermore, inserting an element invalidates
+ *   all iterators and references.
  * - It needs a predicate to determine if two set elements are equal. If an
  *   <tt>operator==</tt> exists to compare instances of type @c K, it will be
  *   used; otherwise, it will use an implementation that uses @c key_compare
